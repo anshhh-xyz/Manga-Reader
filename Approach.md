@@ -22,3 +22,7 @@ Turned score.py into a module to use its functions
 Using score.py as a module and then importing it funtions and testing methods to improve our work
 
 need to fix ocr stuff to scoremax / using regex based algo for that
+
+
+OCR model choosing--easy ocr,paddle ocr and florence,not using paddle as it works on cpu not gpu
+removed florence too,had some isseus while running,using just easy ocr, and easyocr performs well 
