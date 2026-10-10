@@ -26,3 +26,10 @@ need to fix ocr stuff to scoremax / using regex based algo for that
 
 OCR model choosing--easy ocr,paddle ocr and florence,not using paddle as it works on cpu not gpu
 removed florence too,had some isseus while running,using just easy ocr, and easyocr performs well 
+
+
+OCR is skipping small boxes from every page , mainly those which are one word per box 
+merging ballon texts for now,received better results
+updateing the texts span in merged box so to get better results
+still missing on boxes,there are 83 lon unatched boxes ,
+EasyOCR’s paragraph=True mode is dropping or scrambling text before alignment ever sees it. The diagnostic below checks that directly.

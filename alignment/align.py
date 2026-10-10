@@ -14,6 +14,11 @@ Tier: high ≥ 0.85, medium 0.60–0.85, none < 0.60 (a non-story negative).
 Ambiguity: if several different lines tie (repeated “HUH?”/”NO!”), the box is flagged ambiguous. A page-level Hungarian assignment (linear_sum_assignment) then resolves it one-to-one by precision plus position. Ambiguous boxes stay excluded from training even after resolving. Resolving only matters for the ceiling.
 Order index: the gold token position of the first matched token. This gives token-level order.
 """
+
+"""Align cached OCR boxes to gold label lines using score.py's own token matching.
+Usage:  python -m alignment.align development
+Outputs: outputs/alignment/aligned_boxes.json, outputs/alignment/unmatched_lines.json
+"""
 import json
 import sys
 from pathlib import Path
@@ -26,12 +31,12 @@ import score as S  # noqa: E402  (the scorer, used as a library)
 
 OUT = ROOT / "outputs" / "alignment"
 HIGH, MED = 0.85, 0.60
-PAIR_MARGIN = 0.10   # a 2-line candidate must beat the best single line by this
+PAIR_MARGIN = 0.10   # a longer span must beat the best shorter candidate by this
 TIE_EPS = 0.02       # singles within this precision of the best are "tied"
+MAX_SPAN = 4         # a merged box may cover up to this many adjacent gold lines
 
 
 # ---------------------------- ADAPTERS ----------------------------
-# Only these three functions touch score.py. If Step 0 showed different shapes, edit here.
 def toks(text, speaker="x"):
     """text -> list of score.py tokens."""
     return list(S.tokens([{"speaker": speaker, "text": text}]))
@@ -84,9 +89,12 @@ def align_page(boxes, gold_lines):
             singles = [score_candidate(G, offsets, (i,), bt) for i in range(L)]
             sp = [s["precision"] for s in singles]
             best = max(singles, key=lambda s: (s["precision"], s["coverage"]))
-            if L > 1:
-                pairs = [score_candidate(G, offsets, (i, i + 1), bt) for i in range(L - 1)]
-                bp = max(pairs, key=lambda s: (s["precision"], s["coverage"]))
+            for span in range(2, MAX_SPAN + 1):
+                if L < span:
+                    break
+                cands = [score_candidate(G, offsets, tuple(range(i, i + span)), bt)
+                         for i in range(L - span + 1)]
+                bp = max(cands, key=lambda s: (s["precision"], s["coverage"]))
                 if bp["precision"] > best["precision"] + PAIR_MARGIN:
                     best = bp
             rec.update(lines=best["lines"], precision=best["precision"],
