@@ -16,3 +16,11 @@ REF_TRAIN = DATASET / "ref_train.jsonl"
 REF_VAL = DATASET / "ref_val.jsonl"
 
 VAL_FRACTION = 0.2
+
+ALIGNED_PATH      = "outputs/alignment/aligned_boxes.json"
+FILTER_MODEL_PATH = "outputs/filtering/filter_model.joblib"
+OOF_PATH          = "outputs/filtering/filter_oof.pkl"
+PANELS_PATH       = "outputs/panels_dev.json"
+READING_RTL       = True   # placeholder, measured in Step 6
+FILTER_THRESHOLD  = 0.5    # placeholder, tuned in Step 4
+PAGE_GATE         = 0.0    # placeholder, tuned in Step 4

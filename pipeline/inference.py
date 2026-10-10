@@ -5,7 +5,22 @@ from evaluation.common import OUTPUTS, image_paths, score, split_ids, write_json
 from ocr.baseline import ocr_page
 
 CACHE = OUTPUTS / "ocr_cache" / "paddle"
+from configs.config import FILTER_THRESHOLD, PAGE_GATE, READING_RTL
+from filtering.infer_filter import story_prob
+from ordering.reading_order import order_boxes
+from detection.panel_detector import detect_panels
 
+# df_boxes: one row per OCR box for ONE sequence page, columns as above
+df_boxes["p_story"] = story_prob(df_boxes)
+for (seq, pg), g in df_boxes.groupby(["seq_id", "page"]):
+    g = g[g.p_story >= FILTER_THRESHOLD]
+    if len(g) == 0 or g.p_story.max() < PAGE_GATE:
+        page_lines = []
+    else:
+        gray = page_gray(seq, pg); h, w = gray.shape
+        panels = detect_panels(gray, rtl=False)
+        order = order_boxes(g[["x0","y0","x1","y1"]].to_numpy(), panels, READING_RTL, (w, h))
+        page_lines = [{"speaker": "char1", "text": clean_text(g.iloc[i].text)} for i in order]
 
 def clean(text):
     text = "".join(c for c in text if not (unicodedata.category(c) == "Cc" and not c.isspace()))

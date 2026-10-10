@@ -1,8 +1,45 @@
+# Virtual environments
 .venv/
+venv/
+env/
+
+# Large data folders
 dataset/
 outputs/
+
+# Python cache
 __pycache__/
+*.py[cod]
+*.pyo
+
+# Model weights
 *.pt
 *.pth
 *.safetensors
 *.ckpt
+*.bin
+*.onnx
+
+# HuggingFace cache
+.cache/
+
+# Jupyter / IPython
+.ipynb_checkpoints/
+*.ipynb
+
+# OS junk
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+
+# Logs & temp
+*.log
+*.tmp
+*.bak
+
+# Zip output (don't commit the zip itself)
+*.zip
