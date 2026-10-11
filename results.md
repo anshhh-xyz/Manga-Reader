@@ -275,3 +275,94 @@ best: (np.float64(0.13348966803770895), 0.44999999999999996, False) -> {'thresho
 | spk2_t0.55_m1_k4 | dev | 0.7477 | 0.3341 | 0.6866 | 0.5046 | 0.6361 |  |
 | spk2_t0.6_m1_k0 | dev | 0.7477 | 0.2863 | 0.6536 | 0.4808 | 0.6361 |  |
 | spk2_t0.6_m1_k4 | dev | 0.7477 | 0.2863 | 0.6536 | 0.4808 | 0.6361 |  |
+| magi_prev_k0_global_n0 | dev | 0.7477 | 0.3146 | 0.6295 | 0.4603 | 0.6361 |  |
+| magi_prev_k0_global_n1 | dev | 0.7477 | 0.3076 | 0.6261 | 0.4575 | 0.6361 |  |
+| magi_prev_k0_page_n0 | dev | 0.7477 | 0.2581 | 0.6046 | 0.4412 | 0.6361 |  |
+| magi_prev_k0_page_n1 | dev | 0.7477 | 0.2513 | 0.5957 | 0.4341 | 0.6361 |  |
+| magi_prev_k4_global_n0 | dev | 0.7477 | 0.3312 | 0.6406 | 0.4685 | 0.6361 |  |
+| magi_prev_k4_global_n1 | dev | 0.7477 | 0.3238 | 0.6314 | 0.4613 | 0.6361 |  |
+| magi_prev_k4_page_n0 | dev | 0.7477 | 0.3272 | 0.6365 | 0.4645 | 0.6361 |  |
+| magi_prev_k4_page_n1 | dev | 0.7477 | 0.3183 | 0.6266 | 0.4571 | 0.6361 |  |
+| magi_prev_k6_global_n0 | dev | 0.7477 | 0.3179 | 0.6331 | 0.4626 | 0.6361 |  |
+| magi_prev_k6_global_n1 | dev | 0.7477 | 0.3125 | 0.6308 | 0.4607 | 0.6361 |  |
+| magi_prev_k6_page_n0 | dev | 0.7477 | 0.2823 | 0.6164 | 0.4499 | 0.6361 |  |
+| magi_prev_k6_page_n1 | dev | 0.7477 | 0.2743 | 0.6049 | 0.4410 | 0.6361 |  |
+| magi_common_k0_global_n0 | dev | 0.7477 | 0.3141 | 0.6344 | 0.4638 | 0.6361 |  |
+| magi_common_k0_global_n1 | dev | 0.7477 | 0.3076 | 0.6260 | 0.4575 | 0.6361 |  |
+| magi_common_k0_page_n0 | dev | 0.7477 | 0.2573 | 0.6024 | 0.4394 | 0.6361 |  |
+| magi_common_k0_page_n1 | dev | 0.7477 | 0.2512 | 0.5954 | 0.4338 | 0.6361 |  |
+| magi_common_k4_global_n0 | dev | 0.7477 | 0.3215 | 0.6391 | 0.4672 | 0.6361 |  |
+| magi_common_k4_global_n1 | dev | 0.7477 | 0.3151 | 0.6276 | 0.4586 | 0.6361 |  |
+| magi_common_k4_page_n0 | dev | 0.7477 | 0.3119 | 0.6316 | 0.4601 | 0.6361 |  |
+| magi_common_k4_page_n1 | dev | 0.7477 | 0.3055 | 0.6229 | 0.4538 | 0.6361 |  |
+| magi_common_k6_global_n0 | dev | 0.7477 | 0.3151 | 0.6354 | 0.4647 | 0.6361 |  |
+| magi_common_k6_global_n1 | dev | 0.7477 | 0.3099 | 0.6273 | 0.4585 | 0.6361 |  |
+| magi_common_k6_page_n0 | dev | 0.7477 | 0.2770 | 0.6099 | 0.4454 | 0.6361 |  |
+| magi_common_k6_page_n1 | dev | 0.7477 | 0.2720 | 0.6047 | 0.4413 | 0.6361 |  |
+
+
+### Speaker Model Comparison Summary (Phase 5)
+
+| Approach | Configuration | balanced_joint_f1 | text_order_score | Notes |
+|---|---|---|---|---|
+| **Floor** | All char1 | 0.2485 | 0.7477 | Baseline floor |
+| **Magi v2** | magi_prev_k4_global_n0 | **0.3312** | 0.7477 | Best Magi config (unsure=prev, maxk=4, global) |
+| **XGBoost + XY-cut Panels** | spk2_t0.5_m1_k4 | **0.3418** | 0.7477 | Turn-taking & panel gap features |
+| **Gold Control** | Oracle gold speakers | 0.6639 | 0.7477 | Upper bound with perfect speaker labels |
+
+**Key Findings:**
+- Magi beats the floor significantly (+0.0827 over all-char1).
+- Global character clustering (scope='global') and capping at 4 speakers (maxk=4) performs best on 3-page sequences.
+- XGBoost with turn-taking parity slightly edges out zero-shot Magi (0.3418 vs 0.3312) because turn-taking dialogue structure is very rigid in manga panels.
+- Both methods beat the Phase 5 exam requirement.
+| phase6_baseline | dev | 0.7477 | 0.3912 | 0.7361 | 0.5409 | 0.6361 |  |
+| phase6_phase6_spk | dev | 0.7477 | 0.3509 | 0.6670 | 0.4883 | 0.6361 |  |
+
+
+---
+
+## Phase 6 -- Adaptation Results
+
+### Gap Analysis (dev set)
+
+| Component | Current | Oracle/Ceiling | Gap |
+|---|---|---|---|
+| **Speaker** (`balanced_joint_f1`) | 0.3912 | 0.6639 (gold control) | 0.2727 |
+| **Text** (`text_order_score`) | 0.7477 | 0.7622 (alignment ceiling) | 0.0145 |
+
+### Phase 6 Track A -- Speaker Model Adaptation
+
+XGBoost hyperparameter search with extended text features (`exclaim_diff`, `q_diff`, `len_ratio`, `narr_flag`).
+
+| Experiment | text_order_score | balanced_joint_f1 | spk_acc_matched | Notes |
+|---|---|---|---|---|
+| P5 baseline (XGB t0.5_m1_k4) | 0.7477 | 0.3912 | 0.7361 | Phase 5 winning model |
+| P6 Speaker (Track A) | 0.7477 | 0.3509 | 0.6670 | Extended features + HP sweep |
+| Gold control | 0.7477 | 0.6639 | 0.9987 | Oracle upper bound |
+
+**Track A verdict:** Phase 6 speaker model (bjf = 0.3509) did not outperform Phase 5 baseline (0.3912, delta: -0.0403). The extended text features added noise over pure panel geometry & turn-taking parity. Retain Phase 5 baseline (`spk2_t0.5_m1_k4`).
+
+### Phase 6 Track B -- OCR LoRA Adaptation
+
+TrOCR (microsoft/trocr-base-printed) fine-tuned with LoRA (r=8, alpha=16) on aligned manga crops (3 epochs on RTX 5050 GPU).
+
+| Metric | Score |
+|---|---|
+| Crop exact-match accuracy | **0.5062** (50.62%, 699/1381) |
+| Crop char-level accuracy | **0.5840** (58.40%) |
+| Evaluated on | 1,381 aligned crops |
+
+**Track B verdict:** TrOCR LoRA training converged cleanly (loss dropped from 5.0009 -> 1.0869) and successfully adapted to manga typography, achieving 50.62% full exact-string match across 1,381 test crops. However, the existing OCR engine already delivers 0.7477 text_order_score against the 0.7622 ceiling (leaving only a 0.0145 headroom gap). Thus, OCR is not the bottleneck in this benchmark; speaker turn-taking remains the decisive factor.
+
+---
+
+## End-to-End Pipeline Evaluation (Unassisted)
+
+Full unassisted inference (`python -m pipeline.inference --set dev --postprocess`) run from raw images:
+$$\text{Raw Page Images} \to \text{PaddleOCR} \to \text{XY-Cut Panels} \to \text{Story Filter} \to \text{RTL Reading Order} \to \text{XGBoost Turn-Taking}$$
+
+| Experiment | Split | text_order | balanced_joint_f1 | spk_acc_matched | joint_f1 | coverage | Notes |
+|---|---|---|---|---|---|---|---|
+| **full_pipeline_p6** | dev | **0.6874** | **0.3141** | **0.6741** | **0.4625** | **0.5966** | Complete unassisted pipeline on raw images |
+| *Alignment Ceiling* | dev | *0.7622* | *0.6742* | *0.9985* | *0.7410* | *0.6361* | Theoretical ceiling with gold boxes |
+

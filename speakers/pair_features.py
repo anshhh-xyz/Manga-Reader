@@ -30,11 +30,12 @@ def seq_pair_features(boxes, emb, sizes):
             pgap = abs(a["panel"] - b["panel"]) if same_page and a["panel"] >= 0 and b["panel"] >= 0 else np.nan
             ppg = abs(pos[i] - pos[j]) if same_panel else np.nan
             ta, tb = a["text"] or "", b["text"] or ""
+            sim = float(emb[i] @ emb[j]) if emb is not None else np.nan
             X.append([int(same_page), abs(a["page"] - b["page"]), j - i, (j - i) % 2, same_panel, pgap, ppg,
                       dx, dy, dist, g[i][2], g[i][3], g[j][2], g[j][3],
                       (g[i][2] * g[i][3]) / max(g[j][2] * g[j][3], 1e-6),
                       len(ta), len(tb), int("?" in ta), int("?" in tb),
-                      int("!" in ta), int("!" in tb), float(emb[i] @ emb[j])])
+                      int("!" in ta), int("!" in tb), sim])
             sa, sb = a.get("speaker"), b.get("speaker")
             ok = sa not in (None, "UNKNOWN") and sb not in (None, "UNKNOWN")
             y.append(int(sa == sb) if ok else -1)

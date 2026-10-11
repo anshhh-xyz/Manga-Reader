@@ -48,12 +48,13 @@ def labels_from_P(boxes, P, cfg):
             labels[k] = nm
     return labels
 
-def assign_speakers(boxes, emb, sizes, model, cfg):
+def assign_speakers(boxes, sizes, model, cfg, emb=None):
     """Inference entry point: used by pipeline/inference.py (Step 8)."""
-    story = [k for k, b in enumerate(boxes) if b["tag"] != TAG_NARR]
+    story = [k for k, b in enumerate(boxes) if b.get("tag") != TAG_NARR]
     if not story:
         return ["NARRATION"] * len(boxes)
     sub = [boxes[k] for k in story]
-    X, _, pairs = seq_pair_features(sub, emb[story], sizes)
+    sub_emb = emb[story] if emb is not None else None
+    X, _, pairs = seq_pair_features(sub, sub_emb, sizes)
     P = prob_matrix(len(sub), pairs, model.predict_proba(X)[:, 1]) if pairs else np.ones((1, 1))
     return labels_from_P(boxes, P, cfg)
