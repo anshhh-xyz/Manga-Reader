@@ -117,4 +117,161 @@ random_forest    0.7932    0.5979       0.7866        0.7770       0.8305       
 changed the numerical value of narration to 3 on xgboost
 from 3 classification,making a threshold cretiera by 1-p(non-story)
 
+Top 10 by text_order_score:
+    thr  gate  text_order  joint_f1
+4   0.3   0.0    0.590541  0.169733
+8   0.4   0.0    0.584008  0.170661
+5   0.3   0.6    0.582581  0.170820
+9   0.4   0.6    0.577537  0.171694
+12  0.5   0.0    0.573658  0.171433
+13  0.5   0.6    0.570762  0.171634
+17  0.6   0.6    0.562315  0.169338
+16  0.6   0.0    0.562315  0.169338
+6   0.3   0.8    0.558362  0.171625
+1   0.0   0.6    0.557158  0.159817
+
 heurestic reading order model based on kendall tau vs use a model for reading order
+
+
+Top 10 by text_order_score:
+    thr  gate  text_order  joint_f1
+4   0.3   0.0    0.590541  0.169733
+8   0.4   0.0    0.584008  0.170661
+5   0.3   0.6    0.582581  0.170820
+9   0.4   0.6    0.577537  0.171694
+12  0.5   0.0    0.573658  0.171433
+13  0.5   0.6    0.570762  0.171634
+17  0.6   0.6    0.562315  0.169338
+
+
+
+Processed 235 pages — 43 detected as single panel
+Saved panel map to: D:\Projects\BYTE\Manga Task Reader AML-2\outputs\panels_dev.json
+PS D:\Projects\BYTE\Manga Task Reader AML-2> python -m ordering.measure_direction   
+C:\Users\ASUS-PC\AppData\Local\Programs\Python\Python313\python.exe: No module named ordering.measure_direction
+ ordering.measure_direction                  python -m ordering.measure_directions
+>> D:\Projects\BYTE\Manga Task Reader AML-2>
+naive top-to-bottom:   tau=0.7553  pages=160
+XY-cut rtl=True:        tau=0.8913  pages=160
+XY-cut rtl=False:        tau=0.6419  pages=160
+PS D:\Projects\BYTE\Manga Task Reader AML-2> python -m ordering.rescore
+naive       {'text_order_score': 0.5736581182724111, 'balanced_joint_f1': 0.17143308976697047, 'speaker_accuracy_on_matched': 0.6007122135741862, 'joint_f1': 0.3599564556951787, 'matched_token_coverage': 0.519241851440965}
+xy-cut      {'text_order_score': 0.6676573464627684, 'balanced_joint_f1': 0.18840146747673261, 'speaker_accuracy_on_matched': 0.6057022878327882, 'joint_f1': 0.4005275608498339, 'matched_token_coverage': 0.5796083945947872}
+
+
+XY-cut RTL is definitively the right choice:
+
+Tau jumped from 0.755 → 0.891 — the manga is right-to-left, panel-based, exactly as expected
+text_order_score jumped from 0.574 → 0.668 (+9.4 points) just by fixing ordering
+RTL=False was worse than naive (0.642) — confirms this is a genuine RTL manga dataset
+Filter threshold 0.3 + XY-cut RTL is the estimated best combo (~0.69):
+
+rescore ran at thr=0.5. tune_threshold found thr=0.3 adds another +1.7 points on top
+Combined estimate: ~0.668 + 0.017 ≈ 0.685
+
+XY-cut RTL already hits tau=0.891 — that's near the ceiling of what a pairwise model can realistically improve. The pairwise model in pairwise.py is a learned classifier that tries to beat the heuristic, but:
+
+The gap left is 0.891 → ~0.93 max (diminishing returns)
+It translates to maybe +0.01–0.02 text_order_score at best
+It needs order_idx gold labels in your aligned data to train — if those are sparse, the CV will be noisy
+It's also slow (O(n²) pairs per page)
+
+## Phase 4 Final — thr=0.3 + XY-cut RTL (confirmed)
+
+rescore run with FILTER_THRESHOLD=0.3, PAGE_GATE=0.0, READING_RTL=True:
+
+| Method               | text_order_score | balanced_joint_f1 | matched_token_coverage |
+|----------------------|-----------------|-------------------|------------------------|
+| naive (thr=0.3)      | 0.5905          | 0.1697            | 0.5360                 |
+| xy-cut RTL (thr=0.3) | **0.6889**      | **0.1861**        | **0.5977**             |
+
+## Score Trajectory (final)
+
+| Stage                                    | text_order_score | delta   |
+|------------------------------------------|-----------------|---------|
+| Phase 1: EasyOCR naive unfiltered        | 0.535           | baseline|
+| Phase 4a: + filter thr=0.5, naive order  | 0.574           | +0.039  |
+| Phase 4b: + filter thr=0.3, naive order  | 0.591           | +0.017  |
+| Phase 4c: + filter thr=0.3, XY-cut RTL  | **0.689**       | +0.098  |
+| Alignment ceiling                        | 0.762           | —       |
+| Remaining gap                            | **0.073**       | OCR coverage |
+
+matched_token_coverage = 0.598 → only ~60% of gold tokens reach the pipeline.
+Next target: improve OCR recall to close the remaining 0.073 gap (Phase 6).
+Speakers--->
+sequences: 79
+pairwise AUC (all features): 0.5715
+pairwise AUC (no CLIP sim):   0.5735
+saved model + OOF probs
+
+
+PS D:\Projects\BYTE\Manga Task Reader AML-2> python -m speakers.tune_cluster
+thr  merge   ARI   extra_labels/seq
+0.30 False  0.081  +7.75
+0.35 False  0.127  +5.82
+0.40 False  0.115  +4.05
+0.45 False  0.133  +2.06
+0.50 False  0.131  +0.39
+0.55 False  0.132  -0.65
+0.60 False  0.094  -1.29
+0.65 False  0.061  -1.75
+0.70 False  0.050  -1.90
+0.75 False  0.043  -2.01
+0.80 False  0.038  -2.03
+0.85 False  0.038  -2.03
+0.90 False  0.038  -2.03
+0.30 True   0.100  +0.53
+0.35 True   0.111  +0.89
+0.40 True   0.108  +0.80
+0.45 True   0.129  +0.08
+0.50 True   0.127  -0.81
+0.55 True   0.114  -1.23
+0.60 True   0.084  -1.63
+0.65 True   0.059  -1.85
+0.70 True   0.048  -1.97
+0.75 True   0.043  -2.01
+0.80 True   0.038  -2.03
+0.85 True   0.038  -2.03
+0.90 True   0.038  -2.03
+best: (np.float64(0.13348966803770895), 0.44999999999999996, False) -> {'threshold': 0.45, 'merge_singletons': False}| oracle_gt_order_pred_speakers | dev | 0.7384 | 0.2582 | 0.6184 | 0.4557 | 0.6281 | aligned boxes + gold order + predicted speakers, t=0.45, no singleton merge |
+| oracle_spk_t0.35 | dev | 0.7384 | 0.1916 | 0.5449 | 0.3993 | 0.6281 |  |
+| oracle_spk_t0.45 | dev | 0.7384 | 0.2582 | 0.6184 | 0.4557 | 0.6281 |  |
+| oracle_spk_t0.55 | dev | 0.7384 | 0.3206 | 0.6758 | 0.4964 | 0.6281 |  |
+| oracle_spk_t0.65 | dev | 0.7384 | 0.2689 | 0.6486 | 0.4770 | 0.6281 |  |
+| control_gold_speakers | dev | 0.7384 | 0.2689 | 0.6486 | 0.4770 | 0.6281 |  |
+| spk_t0.5_m0_k0 | dev | 0.7477 | 0.3009 | 0.6643 | 0.4894 | 0.6361 |  |
+| spk_t0.5_m0_k4 | dev | 0.7477 | 0.3148 | 0.6717 | 0.4943 | 0.6361 |  |
+| spk_t0.55_m0_k0 | dev | 0.7477 | 0.3206 | 0.6758 | 0.4964 | 0.6361 |  |
+| spk_t0.55_m0_k4 | dev | 0.7477 | 0.3233 | 0.6783 | 0.4982 | 0.6361 |  |
+| spk_t0.6_m0_k0 | dev | 0.7477 | 0.2965 | 0.6644 | 0.4886 | 0.6361 |  |
+| spk_t0.6_m0_k4 | dev | 0.7477 | 0.2965 | 0.6644 | 0.4886 | 0.6361 |  |
+| spk_t0.7_m0_k0 | dev | 0.7477 | 0.2535 | 0.6447 | 0.4735 | 0.6361 |  |
+| spk_t0.7_m0_k4 | dev | 0.7477 | 0.2535 | 0.6447 | 0.4735 | 0.6361 |  |
+| spk_t0.5_m1_k0 | dev | 0.7477 | 0.3326 | 0.6718 | 0.4945 | 0.6361 |  |
+| spk_t0.5_m1_k4 | dev | 0.7477 | 0.3335 | 0.6748 | 0.4964 | 0.6361 |  |
+| spk_t0.55_m1_k0 | dev | 0.7477 | 0.3231 | 0.6747 | 0.4954 | 0.6361 |  |
+| spk_t0.55_m1_k4 | dev | 0.7477 | 0.3253 | 0.6766 | 0.4968 | 0.6361 |  |
+| spk_t0.6_m1_k0 | dev | 0.7477 | 0.2954 | 0.6620 | 0.4868 | 0.6361 |  |
+| spk_t0.6_m1_k4 | dev | 0.7477 | 0.2954 | 0.6620 | 0.4868 | 0.6361 |  |
+| spk_t0.7_m1_k0 | dev | 0.7477 | 0.2513 | 0.6418 | 0.4717 | 0.6361 |  |
+| spk_t0.7_m1_k4 | dev | 0.7477 | 0.2513 | 0.6418 | 0.4717 | 0.6361 |  |
+| control_gold | dev | 0.7477 | 0.6639 | 0.9987 | 0.7351 | 0.6361 |  |
+| floor_all_char1 | dev | 0.7477 | 0.2485 | 0.6391 | 0.4703 | 0.6361 |  |
+| control_gold | dev | 0.7477 | 0.6639 | 0.9987 | 0.7351 | 0.6361 |  |
+| floor_all_char1 | dev | 0.7477 | 0.2485 | 0.6391 | 0.4703 | 0.6361 |  |
+| spk2_t0.4_m0_k0 | dev | 0.7477 | 0.2199 | 0.5792 | 0.4268 | 0.6361 |  |
+| spk2_t0.4_m0_k4 | dev | 0.7477 | 0.2926 | 0.6333 | 0.4661 | 0.6361 |  |
+| spk2_t0.5_m0_k0 | dev | 0.7477 | 0.3051 | 0.6569 | 0.4846 | 0.6361 |  |
+| spk2_t0.5_m0_k4 | dev | 0.7477 | 0.3184 | 0.6613 | 0.4879 | 0.6361 |  |
+| spk2_t0.55_m0_k0 | dev | 0.7477 | 0.3215 | 0.6804 | 0.5001 | 0.6361 |  |
+| spk2_t0.55_m0_k4 | dev | 0.7477 | 0.3236 | 0.6803 | 0.5001 | 0.6361 |  |
+| spk2_t0.6_m0_k0 | dev | 0.7477 | 0.2874 | 0.6562 | 0.4823 | 0.6361 |  |
+| spk2_t0.6_m0_k4 | dev | 0.7477 | 0.2874 | 0.6562 | 0.4823 | 0.6361 |  |
+| spk2_t0.4_m1_k0 | dev | 0.7477 | 0.2974 | 0.6031 | 0.4432 | 0.6361 |  |
+| spk2_t0.4_m1_k4 | dev | 0.7477 | 0.3333 | 0.6418 | 0.4712 | 0.6361 |  |
+| spk2_t0.5_m1_k0 | dev | 0.7477 | 0.3396 | 0.6739 | 0.4958 | 0.6361 |  |
+| spk2_t0.5_m1_k4 | dev | 0.7477 | 0.3418 | 0.6762 | 0.4980 | 0.6361 |  |
+| spk2_t0.55_m1_k0 | dev | 0.7477 | 0.3329 | 0.6866 | 0.5046 | 0.6361 |  |
+| spk2_t0.55_m1_k4 | dev | 0.7477 | 0.3341 | 0.6866 | 0.5046 | 0.6361 |  |
+| spk2_t0.6_m1_k0 | dev | 0.7477 | 0.2863 | 0.6536 | 0.4808 | 0.6361 |  |
+| spk2_t0.6_m1_k4 | dev | 0.7477 | 0.2863 | 0.6536 | 0.4808 | 0.6361 |  |

@@ -21,6 +21,6 @@ ALIGNED_PATH      = "outputs/alignment/aligned_boxes.json"
 FILTER_MODEL_PATH = "outputs/filtering/filter_model.joblib"
 OOF_PATH          = "outputs/filtering/filter_oof.pkl"
 PANELS_PATH       = "outputs/panels_dev.json"
-READING_RTL       = True   # placeholder, measured in Step 6
-FILTER_THRESHOLD  = 0.5    # placeholder, tuned in Step 4
-PAGE_GATE         = 0.0    # placeholder, tuned in Step 4
+READING_RTL       = True   # measured: XY-cut RTL tau=0.891 >> naive tau=0.755
+FILTER_THRESHOLD  = 0.3    # tuned: best text_order_score in tune_threshold grid search
+PAGE_GATE         = 0.0    # tuned: gate=0.0 wins (0.5905 vs 0.5826 at gate=0.6)

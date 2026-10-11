@@ -1,80 +1,137 @@
-from ocr.postprocess import clean_line, join_wrapped   
+# pipeline/inference.py
+"""Full pipeline: image → EasyOCR → story filter → XY-cut RTL order → JSONL.
+
+Run with:
+    python -m pipeline.inference --set dev --out outputs/predictions_dev.jsonl
+
+Requires:
+    outputs/filtering/filter_model.joblib   (from filtering/train_filter.py)
+    outputs/panels_dev.json                 (from detection/run_panels.py)
+"""
 import argparse
-import unicodedata
+import json
+from pathlib import Path
+
 from evaluation.common import OUTPUTS, image_paths, score, split_ids, write_jsonl
 from ocr.baseline import ocr_page
-
-CACHE = OUTPUTS / "ocr_cache" / "paddle"
-from configs.config import FILTER_THRESHOLD, PAGE_GATE, READING_RTL
+from ocr.postprocess import clean_line, join_wrapped
+from configs.config import FILTER_THRESHOLD, PAGE_GATE, READING_RTL, PANELS_PATH
 from filtering.infer_filter import story_prob
+from filtering.common import page_gray
 from ordering.reading_order import order_boxes
-from detection.panel_detector import detect_panels
 
-# df_boxes: one row per OCR box for ONE sequence page, columns as above
-df_boxes["p_story"] = story_prob(df_boxes)
-for (seq, pg), g in df_boxes.groupby(["seq_id", "page"]):
-    g = g[g.p_story >= FILTER_THRESHOLD]
-    if len(g) == 0 or g.p_story.max() < PAGE_GATE:
-        page_lines = []
-    else:
-        gray = page_gray(seq, pg); h, w = gray.shape
-        panels = detect_panels(gray, rtl=False)
-        order = order_boxes(g[["x0","y0","x1","y1"]].to_numpy(), panels, READING_RTL, (w, h))
-        page_lines = [{"speaker": "char1", "text": clean_text(g.iloc[i].text)} for i in order]
+import numpy as np
+import pandas as pd
 
-def clean(text):
-    text = "".join(c for c in text if not (unicodedata.category(c) == "Cc" and not c.isspace()))
-    return text.strip()
+ROOT = Path(__file__).resolve().parents[1]
+
+# Cache folder for EasyOCR results (avoids re-running GPU OCR)
+CACHE = OUTPUTS / "ocr_cache" / "easyocr"
+
+# Load panel map once at startup (None → detect on-the-fly)
+_panels_path = ROOT / PANELS_PATH if not Path(PANELS_PATH).is_absolute() else Path(PANELS_PATH)
+_PANELS: dict | None = None
+
+def _load_panels():
+    global _PANELS
+    if _PANELS is None:
+        if _panels_path.exists():
+            _PANELS = json.loads(_panels_path.read_text(encoding="utf-8"))
+        else:
+            _PANELS = {}   # will fall back to full-page single panel
+    return _PANELS
 
 
-def naive_order(boxes):
-    # Phase 1 only: top-to-bottom, then left-to-right. Real reading order comes in Phase 4.
-    return sorted(boxes, key=lambda b: (b["box"][1], b["box"][0]))
+def _get_panels(seq_id: str, page: int):
+    """Return {"panels": [...], "size": [w, h]} or None for full-page fallback."""
+    key = f"{seq_id}|{page}"
+    return _load_panels().get(key)
 
-def predict_sequence(seq_id, min_conf, pp=False, join=False):
+
+def predict_sequence(seq_id: str, min_conf: float = 0.3,
+                     postprocess: bool = True, join_hyphens: bool = False) -> list:
+    """Run the full Phase 4 pipeline for one sequence.
+
+    Returns a list of 3 page-lists, each page-list being:
+        [{"speaker": "char1", "text": "..."}, ...]
+    """
+    img_paths = image_paths(seq_id)
     pages = []
-    for img in image_paths(seq_id):
-        boxes = [b for b in ocr_page(img, CACHE) if b["conf"] >= min_conf]
-        texts = [clean(b["text"]) for b in naive_order(boxes)]
-        if pp:
+
+    for pg, img in enumerate(img_paths):
+        # ── OCR ───────────────────────────────────────────────────────────────
+        raw_boxes = [b for b in ocr_page(img, CACHE) if b["conf"] >= min_conf]
+
+        if not raw_boxes:
+            pages.append([])
+            continue
+
+        # ── Build DataFrame for filter ─────────────────────────────────────────
+        df = pd.DataFrame([{
+            "seq_id": seq_id,
+            "page":   pg,
+            "x0":     min(pt[0] for pt in b["box"]),
+            "y0":     min(pt[1] for pt in b["box"]),
+            "x1":     max(pt[0] for pt in b["box"]),
+            "y1":     max(pt[1] for pt in b["box"]),
+            "text":   b["text"],
+            "conf":   b["conf"],
+        } for b in raw_boxes])
+
+        # ── Story filter ───────────────────────────────────────────────────────
+        df["p_story"] = story_prob(df)
+        df = df[df["p_story"] >= FILTER_THRESHOLD].reset_index(drop=True)
+
+        if len(df) == 0 or df["p_story"].max() < PAGE_GATE:
+            pages.append([])
+            continue
+
+        # ── Reading order (XY-cut RTL) ─────────────────────────────────────────
+        panel_info = _get_panels(seq_id, pg)
+        if panel_info:
+            panels = panel_info["panels"]
+            size   = panel_info["size"]
+        else:
+            # fallback: single panel = whole page
+            gray   = page_gray(seq_id, pg)
+            h, w   = gray.shape
+            panels = [(0, 0, w, h)]
+            size   = (w, h)
+
+        boxes = df[["x0", "y0", "x1", "y1"]].to_numpy()
+        order = order_boxes(boxes, panels, READING_RTL, size)
+
+        # ── Post-process and emit ──────────────────────────────────────────────
+        lines = []
+        texts = [df.iloc[i]["text"] for i in order]
+        if postprocess:
             texts = [clean_line(t) for t in texts]
-        if join:
+        if join_hyphens:
             texts = join_wrapped(texts)
-        pages.append([{"speaker": "char1", "text": t} for t in texts if score.norm(t)])
+        for t in texts:
+            t = t.strip()
+            if t and score.norm(t):
+                lines.append({"speaker": "char1", "text": t})
+
+        pages.append(lines)
+
     return pages
 
 
 if __name__ == "__main__":
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--set", default="dev", choices=["dev", "train", "val", "test"])
-    ap.add_argument("--out", required=True)
-    ap.add_argument("--min-conf", type=float, default=0.5)
-    ap.add_argument("--postprocess", action="store_true")
-    ap.add_argument("--join-hyphens", action="store_true")
+    ap = argparse.ArgumentParser(description="Run full manga OCR pipeline.")
+    ap.add_argument("--set",         default="dev",  choices=["dev", "train", "val", "test"])
+    ap.add_argument("--out",         required=True,  help="Output JSONL path")
+    ap.add_argument("--min-conf",    type=float,     default=0.3,   help="Min OCR confidence")
+    ap.add_argument("--postprocess", action="store_true",           help="Apply OCR post-processing")
+    ap.add_argument("--join-hyphens",action="store_true",           help="Join wrapped hyphenated lines")
     args = ap.parse_args()
 
-    ids = split_ids(args.set)
+    ids  = split_ids(args.set)
     rows = {}
     for n, sid in enumerate(ids, 1):
         rows[sid] = predict_sequence(sid, args.min_conf, args.postprocess, args.join_hyphens)
         print(f"[{n}/{len(ids)}] {sid}")
+
     write_jsonl(rows, args.out)
-    print(f"wrote {args.out}")
-
-
-
-
-
-
-"""Gets manga pages for each sequence.
-Runs PaddleOCR to detect and read text.
-Removes low-confidence OCR results using --min-conf.
-Sorts text top-to-bottom, then left-to-right.
-Optionally cleans OCR mistakes with --postprocess.
-Optionally joins hyphenated lines with --join-hyphens.
-Temporarily labels all text as char1 because speaker detection comes later.
-Saves everything as JSONL for evaluation with score.py.
-
-So basically:
-
-Images → OCR → filter → clean → order → JSONL → scoring."""
+    print(f"Wrote {args.out}")
