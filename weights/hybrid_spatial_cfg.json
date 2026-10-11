@@ -1,0 +1,14 @@
+{
+  "stack_bonus": 0.4,
+  "same_panel_bonus": 0.2,
+  "alternation_bonus": 0.2,
+  "cross_panel_penalty": 0.0,
+  "alpha": 0.3,
+  "new_speaker_threshold": 0.05,
+  "max_speakers": 4,
+  "window": 3,
+  "stacked_dx_max": 0.12,
+  "stacked_dy_min": -0.03,
+  "stacked_dy_max": 0.1,
+  "horiz_split_dx_min": 0.16
+}

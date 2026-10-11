@@ -7,6 +7,10 @@
 | P2 paddle naive | val | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 0.0000 | crashed (oneDNN NotImplementedError), fix pending |
 | P2 easyocr naive | val | 0.5352 | 0.1679 | 0.5994 | 0.3594 | 0.5796 | 2.1s/seq, bagP 0.767, bagR 0.820, ordR 0.611 |
 | P3 alignment ceiling (high+med) | dev | 0.7622 | 0.6742 | 0.9985 | 0.7409 | 0.6454 | matched OCR boxes + gold order + gold speakers |
+| P7 sequential tracker (SBERT) | dev | 0.7477 | 0.3242 | 0.5903 | 0.4348 | 0.6361 | all-MiniLM-L6-v2 + turn-taking prior |
+| P8 enhanced spatial clusterer (Option 3) | dev | 0.7477 | 0.3509 | 0.6670 | 0.4883 | 0.6361 | 27-feat XGBoost + agglomerative clusterer |
+| P9 hybrid spatial tracker tuned (Option 2) | dev | 0.7477 | 0.3267 | 0.5957 | 0.4380 | 0.6361 | Refined normalized geometry H1/H2/H3 sweep (76.2% stacked acc, 2.56 pred spks) |
+| P10 pairwise turn-taking XGBoost (Phase 5) | dev | 0.7477 | **0.3912** | **0.7361** | **0.5409** | 0.6361 | **OVERALL CHAMPION** (Rank parity + physical panel gaps + t=0.50 clustering) |
 
 ---
 
@@ -366,3 +370,11 @@ $$\text{Raw Page Images} \to \text{PaddleOCR} \to \text{XY-Cut Panels} \to \text
 | **full_pipeline_p6** | dev | **0.6874** | **0.3141** | **0.6741** | **0.4625** | **0.5966** | Complete unassisted pipeline on raw images |
 | *Alignment Ceiling* | dev | *0.7622* | *0.6742* | *0.9985* | *0.7410* | *0.6361* | Theoretical ceiling with gold boxes |
 
+| yolo_val | val | 0.6601 | 0.2864 | 0.6416 | 0.4285 | 0.6046 |  |
+| option3_val | val | 0.7859 | 0.3713 | 0.6714 | 0.5210 | 0.6807 |  |
+| pipeline_pred_val | val | 0.7687 | 0.3380 | 0.6508 | 0.4950 | 0.6667 |  |
+| yolo_v2_preprocessed | val | 0.6486 | 0.2808 | 0.6472 | 0.4237 | 0.5994 |  |
+| yolo_v3_clahe | val | 0.6627 | 0.2871 | 0.6479 | 0.4354 | 0.6200 |  |
+| hybrid_yolo_val | val | 0.7673 | 0.3607 | 0.6626 | 0.5030 | 0.6665 |  |
+| hybrid_yolo_narr_val | val | 0.7673 | 0.3368 | 0.6913 | 0.5230 | 0.6665 |  |
+| yolo_hybrid_val | val | 0.7673 | 0.3607 | 0.6626 | 0.5030 | 0.6665 |  |

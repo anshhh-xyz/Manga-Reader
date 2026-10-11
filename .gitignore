@@ -12,14 +12,6 @@ __pycache__/
 *.py[cod]
 *.pyo
 
-# Model weights
-*.pt
-*.pth
-*.safetensors
-*.ckpt
-*.bin
-*.onnx
-
 # HuggingFace cache
 .cache/
 

@@ -1,0 +1,5 @@
+{
+    "threshold": 0.5,
+    "merge_singletons": true,
+    "max_clusters": 4
+}

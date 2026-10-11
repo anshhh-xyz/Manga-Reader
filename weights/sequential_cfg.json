@@ -1,0 +1,7 @@
+{
+  "alpha": 1.0,
+  "beta": 0.3,
+  "new_speaker_threshold": 0.15,
+  "max_speakers": 3,
+  "window": 3
+}

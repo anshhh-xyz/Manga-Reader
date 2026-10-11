@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MANGA TASK READER — AML-2</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #09090b;
+      --card-bg: #111113;
+      --card-border: #27272a;
+      --card-hover: #18181b;
+      --text-main: #f4f4f5;
+      --text-muted: #a1a1aa;
+      --text-dim: #71717a;
+      --accent: #ffffff;
+      --accent-bg: #18181b;
+      --border-light: #3f3f46;
+      --badge-char1: #f4f4f5;
+      --badge-char2: #e4e4e7;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: 'Space Grotesk', -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      line-height: 1.5;
+    }
+
+    /* Header */
+    header {
+      border-bottom: 1px solid var(--card-border);
+      padding: 1.25rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(9, 9, 11, 0.85);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .brand-mark {
+      width: 32px;
+      height: 32px;
+      background: #ffffff;
+      color: #000000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.5px;
+    }
+
+    .brand-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      text-transform: uppercase;
+    }
+
+    .brand-sub {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 0.5px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .tag-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      padding: 0.35rem 0.75rem;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 4px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .dot {
+      width: 6px;
+      height: 6px;
+      background: #ffffff;
+      border-radius: 50%;
+    }
+
+    /* Main Container */
+    main {
+      flex: 1;
+      max-width: 1320px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2.5rem 2rem 4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2.5rem;
+    }
+
+    /* Hero / Intro */
+    .hero {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 2rem;
+    }
+
+    .hero-text h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      letter-spacing: -1px;
+      line-height: 1.15;
+      text-transform: uppercase;
+    }
+
+    .hero-text p {
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+      font-size: 0.95rem;
+      max-width: 600px;
+    }
+
+    .btn-sample {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      padding: 0.75rem 1.25rem;
+      background: transparent;
+      border: 1px solid var(--border-light);
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+    }
+
+    .btn-sample:hover {
+      background: #ffffff;
+      color: #000000;
+      border-color: #ffffff;
+    }
+
+    /* 3-Image Upload Grid */
+    .upload-section {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .section-title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text-dim);
+      letter-spacing: 1.5px;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--card-border);
+    }
+
+    .slots-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+
+    .slot-card {
+      background: var(--card-bg);
+      border: 1px dashed var(--card-border);
+      border-radius: 6px;
+      min-height: 380px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      overflow: hidden;
+    }
+
+    .slot-card:hover {
+      border-color: #71717a;
+      background: var(--card-hover);
+    }
+
+    .slot-card.has-file {
+      border-style: solid;
+      border-color: var(--border-light);
+    }
+
+    .slot-card.drag-over {
+      border-color: #ffffff;
+      background: #18181b;
+    }
+
+    .slot-header {
+      padding: 0.9rem 1.25rem;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    .slot-number {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .slot-status {
+      font-size: 0.7rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text-dim);
+    }
+
+    .slot-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      position: relative;
+    }
+
+    .slot-empty-icon {
+      width: 48px;
+      height: 48px;
+      border: 1px dashed var(--text-dim);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
+      font-size: 1.5rem;
+      color: var(--text-muted);
+    }
+
+    .slot-empty-text {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+
+    .slot-empty-sub {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      margin-top: 0.25rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .slot-preview {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #000000;
+      display: none;
+    }
+
+    .slot-card.has-file .slot-preview {
+      display: block;
+    }
+
+    .slot-card.has-file .slot-empty-state {
+      display: none;
+    }
+
+    .slot-actions {
+      position: absolute;
+      bottom: 1rem;
+      right: 1rem;
+      display: none;
+      z-index: 10;
+    }
+
+    .slot-card.has-file .slot-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn-icon {
+      background: rgba(0, 0, 0, 0.8);
+      border: 1px solid var(--border-light);
+      color: #ffffff;
+      padding: 0.4rem 0.8rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      cursor: pointer;
+      backdrop-filter: blur(4px);
+      transition: all 0.15s ease;
+    }
+
+    .btn-icon:hover {
+      background: #ffffff;
+      color: #000000;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    /* Submit Controls */
+    .controls-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      padding: 1.25rem 2rem;
+      border-radius: 6px;
+    }
+
+    .status-hint {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .btn-submit {
+      background: #ffffff;
+      color: #000000;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      padding: 0.9rem 2.5rem;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-transform: uppercase;
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      background: #e4e4e7;
+      transform: translateY(-1px);
+    }
+
+    .btn-submit:disabled {
+      background: #27272a;
+      color: #71717a;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Results Section */
+    #results-section {
+      display: none;
+      flex-direction: column;
+      gap: 2rem;
+      animation: fadeIn 0.4s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Stats Overview */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.25rem;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      padding: 1.25rem 1.5rem;
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .stat-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .stat-sub {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* Tabs */
+    .tabs-header {
+      display: flex;
+      border-bottom: 1px solid var(--card-border);
+      gap: 2rem;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 0.8rem 0;
+      cursor: pointer;
+      position: relative;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: color 0.2s ease;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-main);
+    }
+
+    .tab-btn.active {
+      color: #ffffff;
+    }
+
+    .tab-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: #ffffff;
+    }
+
+    /* Tab Panes */
+    .tab-pane {
+      display: none;
+    }
+
+    .tab-pane.active {
+      display: block;
+    }
+
+    /* Visual Inspector Pane */
+    .visual-gallery {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+
+    .visual-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .visual-header {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--card-border);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .visual-img-wrap {
+      background: #000000;
+      cursor: zoom-in;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      max-height: 580px;
+      overflow: hidden;
+    }
+
+    .visual-img-wrap img {
+      width: 100%;
+      height: auto;
+      display: block;
+      transition: transform 0.2s ease;
+    }
+
+    .visual-img-wrap:hover img {
+      transform: scale(1.02);
+    }
+
+    /* Script View Pane */
+    .script-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      max-width: 900px;
+    }
+
+    .script-item {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-left: 3px solid #ffffff;
+      padding: 1.15rem 1.5rem;
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      transition: border-color 0.15s ease;
+    }
+
+    .script-item:hover {
+      border-color: #71717a;
+      border-left-color: #ffffff;
+    }
+
+    .script-meta {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+    }
+
+    .speaker-pill {
+      background: #ffffff;
+      color: #000000;
+      font-weight: 700;
+      padding: 0.2rem 0.6rem;
+      border-radius: 2px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .speaker-pill.narration {
+      background: #27272a;
+      color: #a1a1aa;
+      border: 1px solid var(--border-light);
+    }
+
+    .script-loc {
+      color: var(--text-dim);
+    }
+
+    .script-text {
+      font-size: 1.05rem;
+      color: var(--text-main);
+      font-weight: 500;
+      letter-spacing: -0.2px;
+    }
+
+    /* JSON Pane */
+    .json-box {
+      background: #050507;
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      position: relative;
+    }
+
+    .json-toolbar {
+      padding: 0.75rem 1.25rem;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .json-toolbar span {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--text-dim);
+    }
+
+    pre code {
+      display: block;
+      padding: 1.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      color: #d4d4d8;
+      overflow-x: auto;
+      max-height: 500px;
+    }
+
+    /* Loading Overlay */
+    .loader {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid #000000;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Lightbox Modal */
+    #modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.92);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    #modal img {
+      max-width: 90vw;
+      max-height: 90vh;
+      object-fit: contain;
+      border: 1px solid var(--card-border);
+    }
+
+    #modal-close {
+      position: absolute;
+      top: 1.5rem;
+      right: 2rem;
+      color: #ffffff;
+      font-size: 2rem;
+      font-family: 'JetBrains Mono', monospace;
+      cursor: pointer;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .slots-grid, .visual-gallery {
+        grid-template-columns: 1fr;
+      }
+      .stats-row {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .hero {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="brand-mark">M</div>
+      <div>
+        <div class="brand-title">Manga Task Reader</div>
+        <div class="brand-sub">AML-2 • Pipeline v6.0</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="tag-badge">
+        <div class="dot"></div>
+        <span>RTL (右から左) READING ENGINE</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero Header -->
+    <section class="hero">
+      <div class="hero-text">
+        <h1>Manga Sequence Reader</h1>
+        <p>Upload a 3-page manga sequence. The pipeline detects panels, transcribes dialogue via OCR, orders speech balloons right-to-left, and groups speakers using pairwise dialogue turn-taking.</p>
+      </div>
+      <button class="btn-sample" id="btn-sample">
+        <span>Load Sample Sequence (3 Pages)</span>
+        <span>→</span>
+      </button>
+    </section>
+
+    <!-- Upload Grid -->
+    <section class="upload-section">
+      <div class="section-title">01 / Sequence Input (Exactly 3 Pages)</div>
+      
+      <div class="slots-grid">
+        <!-- Page 1 Slot -->
+        <div class="slot-card" id="slot-0" data-page="0">
+          <input type="file" id="file-0" accept="image/*">
+          <div class="slot-header">
+            <span class="slot-number">PAGE 01</span>
+            <span class="slot-status" id="status-0">WAITING</span>
+          </div>
+          <div class="slot-body">
+            <div class="slot-empty-state">
+              <div class="slot-empty-icon">+</div>
+              <div class="slot-empty-text">Drop Page 1 Here</div>
+              <div class="slot-empty-sub">or click to browse</div>
+            </div>
+            <img class="slot-preview" id="prev-0" alt="Page 1 preview">
+            <div class="slot-actions">
+              <button class="btn-icon btn-remove" data-page="0">CLEAR</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Page 2 Slot -->
+        <div class="slot-card" id="slot-1" data-page="1">
+          <input type="file" id="file-1" accept="image/*">
+          <div class="slot-header">
+            <span class="slot-number">PAGE 02</span>
+            <span class="slot-status" id="status-1">WAITING</span>
+          </div>
+          <div class="slot-body">
+            <div class="slot-empty-state">
+              <div class="slot-empty-icon">+</div>
+              <div class="slot-empty-text">Drop Page 2 Here</div>
+              <div class="slot-empty-sub">or click to browse</div>
+            </div>
+            <img class="slot-preview" id="prev-1" alt="Page 2 preview">
+            <div class="slot-actions">
+              <button class="btn-icon btn-remove" data-page="1">CLEAR</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Page 3 Slot -->
+        <div class="slot-card" id="slot-2" data-page="2">
+          <input type="file" id="file-2" accept="image/*">
+          <div class="slot-header">
+            <span class="slot-number">PAGE 03</span>
+            <span class="slot-status" id="status-2">WAITING</span>
+          </div>
+          <div class="slot-body">
+            <div class="slot-empty-state">
+              <div class="slot-empty-icon">+</div>
+              <div class="slot-empty-text">Drop Page 3 Here</div>
+              <div class="slot-empty-sub">or click to browse</div>
+            </div>
+            <img class="slot-preview" id="prev-2" alt="Page 3 preview">
+            <div class="slot-actions">
+              <button class="btn-icon btn-remove" data-page="2">CLEAR</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Bar -->
+      <div class="controls-bar">
+        <div class="status-hint" id="status-hint">
+          <span>Upload all 3 pages to start inference.</span>
+        </div>
+        <button class="btn-submit" id="btn-submit" disabled>
+          <span id="btn-text">ANALYZE SEQUENCE</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Results Section -->
+    <section id="results-section">
+      <div class="section-title">02 / Pipeline Inference Output</div>
+
+      <!-- Overview Stats -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Dialogue Bubbles</div>
+          <div class="stat-value" id="stat-bubbles">0</div>
+          <div class="stat-sub">Spoken story lines</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Panels Detected</div>
+          <div class="stat-value" id="stat-panels">0</div>
+          <div class="stat-sub">XY-cut segmentation</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Characters Identified</div>
+          <div class="stat-value" id="stat-chars">0</div>
+          <div class="stat-sub" id="stat-chars-sub">Awaiting clustering</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Reading Direction</div>
+          <div class="stat-value">RTL</div>
+          <div class="stat-sub">Right-to-Left, Top-to-Bottom</div>
+        </div>
+      </div>
+
+      <!-- Tabs Navigation -->
+      <div class="tabs-header">
+        <button class="tab-btn active" data-tab="tab-visual">Annotated Visuals</button>
+        <button class="tab-btn" data-tab="tab-script">Manga Script</button>
+        <button class="tab-btn" data-tab="tab-json">JSON Output</button>
+      </div>
+
+      <!-- Tab 1: Visual Inspector -->
+      <div class="tab-pane active" id="tab-visual">
+        <div class="visual-gallery">
+          <div class="visual-card">
+            <div class="visual-header">
+              <span>PAGE 01</span>
+              <span id="vis-count-0">0 lines</span>
+            </div>
+            <div class="visual-img-wrap" id="wrap-0">
+              <img id="vis-img-0" alt="Annotated Page 1">
+            </div>
+          </div>
+
+          <div class="visual-card">
+            <div class="visual-header">
+              <span>PAGE 02</span>
+              <span id="vis-count-1">0 lines</span>
+            </div>
+            <div class="visual-img-wrap" id="wrap-1">
+              <img id="vis-img-1" alt="Annotated Page 2">
+            </div>
+          </div>
+
+          <div class="visual-card">
+            <div class="visual-header">
+              <span>PAGE 03</span>
+              <span id="vis-count-2">0 lines</span>
+            </div>
+            <div class="visual-img-wrap" id="wrap-2">
+              <img id="vis-img-2" alt="Annotated Page 3">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 2: Script View -->
+      <div class="tab-pane" id="tab-script">
+        <div class="script-list" id="script-list">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+
+      <!-- Tab 3: JSON Output -->
+      <div class="tab-pane" id="tab-json">
+        <div class="json-box">
+          <div class="json-toolbar">
+            <span>PREDICTIONS_FORMAT.JSON</span>
+            <div style="display: flex; gap: 0.5rem;">
+              <button class="btn-icon" id="btn-copy-json">COPY JSON</button>
+              <button class="btn-icon" id="btn-dl-json">DOWNLOAD</button>
+            </div>
+          </div>
+          <pre><code id="json-code">// Inference output will display here</code></pre>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal Lightbox -->
+  <div id="modal">
+    <span id="modal-close">×</span>
+    <img id="modal-img" alt="Zoomed view">
+  </div>
+
+  <script>
+    // State
+    const files = [null, null, null];
+    let latestData = null;
+
+    // Elements
+    const submitBtn = document.getElementById('btn-submit');
+    const submitText = document.getElementById('btn-text');
+    const sampleBtn = document.getElementById('btn-sample');
+    const statusHint = document.getElementById('status-hint');
+    const resultsSection = document.getElementById('results-section');
+
+    // Slot Setup
+    [0, 1, 2].forEach(idx => {
+      const card = document.getElementById(`slot-${idx}`);
+      const fileInput = document.getElementById(`file-${idx}`);
+      const preview = document.getElementById(`prev-${idx}`);
+      const status = document.getElementById(`status-${idx}`);
+
+      card.addEventListener('click', (e) => {
+        if (e.target.classList.contains('btn-remove')) return;
+        fileInput.click();
+      });
+
+      fileInput.addEventListener('change', (e) => {
+        if (e.target.files && e.target.files[0]) {
+          setFile(idx, e.target.files[0]);
+        }
+      });
+
+      // Drag and drop
+      card.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        card.classList.add('drag-over');
+      });
+
+      card.addEventListener('dragleave', () => {
+        card.classList.remove('drag-over');
+      });
+
+      card.addEventListener('drop', (e) => {
+        e.preventDefault();
+        card.classList.remove('drag-over');
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+          setFile(idx, e.dataTransfer.files[0]);
+        }
+      });
+
+      // Clear button
+      card.querySelector('.btn-remove').addEventListener('click', (e) => {
+        e.stopPropagation();
+        clearFile(idx);
+      });
+    });
+
+    function setFile(idx, file) {
+      files[idx] = file;
+      const card = document.getElementById(`slot-${idx}`);
+      const preview = document.getElementById(`prev-${idx}`);
+      const status = document.getElementById(`status-${idx}`);
+
+      card.classList.add('has-file');
+      status.textContent = 'READY';
+      status.style.color = '#ffffff';
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        preview.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+      updateSubmitState();
+    }
+
+    function clearFile(idx) {
+      files[idx] = null;
+      const card = document.getElementById(`slot-${idx}`);
+      const preview = document.getElementById(`prev-${idx}`);
+      const status = document.getElementById(`status-${idx}`);
+      const fileInput = document.getElementById(`file-${idx}`);
+
+      fileInput.value = '';
+      preview.src = '';
+      card.classList.remove('has-file');
+      status.textContent = 'WAITING';
+      status.style.color = '';
+      updateSubmitState();
+    }
+
+    function updateSubmitState() {
+      const readyCount = files.filter(f => f !== null).length;
+      if (readyCount === 3) {
+        submitBtn.disabled = false;
+        statusHint.textContent = 'All 3 pages ready. Ready for inference.';
+        statusHint.style.color = '#f4f4f5';
+      } else {
+        submitBtn.disabled = true;
+        statusHint.textContent = `${readyCount}/3 pages loaded. Exactly 3 required.`;
+        statusHint.style.color = '';
+      }
+    }
+
+    // Submit handler
+    submitBtn.addEventListener('click', async () => {
+      if (files.filter(f => f !== null).length !== 3) return;
+
+      submitBtn.disabled = true;
+      submitText.innerHTML = '<span class="loader"></span> ANALYZING PIPELINE...';
+      statusHint.textContent = 'Running: Panels → OCR → Filter → Reading Order → Speaker Memory';
+
+      const formData = new FormData();
+      formData.append('page1', files[0]);
+      formData.append('page2', files[1]);
+      formData.append('page3', files[2]);
+      formData.append('sequence_name', 'custom_run');
+
+      try {
+        const res = await fetch('/api/analyze', {
+          method: 'POST',
+          body: formData
+        });
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || 'Inference failed');
+        }
+        const data = await res.json();
+        renderResults(data);
+      } catch (err) {
+        alert('Pipeline Error: ' + err.message);
+      } finally {
+        submitBtn.disabled = false;
+        submitText.textContent = 'ANALYZE SEQUENCE';
+        statusHint.textContent = 'Sequence processed successfully.';
+      }
+    });
+
+    // Sample button handler
+    sampleBtn.addEventListener('click', async () => {
+      sampleBtn.disabled = true;
+      sampleBtn.innerHTML = '<span class="loader"></span> Loading Sample...';
+      try {
+        const res = await fetch('/api/sample');
+        if (!res.ok) throw new Error('Could not load sample sequence');
+        const data = await res.json();
+        renderResults(data);
+      } catch (err) {
+        alert('Sample Error: ' + err.message);
+      } finally {
+        sampleBtn.disabled = false;
+        sampleBtn.innerHTML = '<span>Load Sample Sequence (3 Pages)</span> <span>→</span>';
+      }
+    });
+
+    // Render results
+    function renderResults(data) {
+      latestData = data;
+      resultsSection.style.display = 'flex';
+
+      // 1. Stats
+      document.getElementById('stat-bubbles').textContent = data.stats.total_dialogue_bubbles;
+      document.getElementById('stat-panels').textContent = data.stats.total_panels;
+      document.getElementById('stat-chars').textContent = data.stats.character_count;
+      document.getElementById('stat-chars-sub').textContent = data.stats.characters_detected.join(', ') || 'None';
+
+      // 2. Visuals
+      for (let i = 0; i < 3; i++) {
+        const img = document.getElementById(`vis-img-i`.replace('i', i));
+        const count = document.getElementById(`vis-count-i`.replace('i', i));
+        if (data.annotated_images[i]) {
+          img.src = data.annotated_images[i];
+          count.textContent = `${data.pages[i].length} dialogue lines`;
+        }
+      }
+
+      // 3. Script
+      const scriptList = document.getElementById('script-list');
+      scriptList.innerHTML = '';
+      if (!data.script || data.script.length === 0) {
+        scriptList.innerHTML = '<div style="color: #71717a; font-family: monospace;">No dialogue lines survived story filtering.</div>';
+      } else {
+        data.script.forEach(line => {
+          const item = document.createElement('div');
+          item.className = 'script-item';
+          const isNarr = line.speaker === 'NARRATION';
+          item.innerHTML = `
+            <div class="script-meta">
+              <span class="speaker-pill ${isNarr ? 'narration' : ''}">${line.speaker}</span>
+              <span class="script-loc">#${line.order} • PAGE ${line.page} • PANEL ${line.panel}</span>
+            </div>
+            <div class="script-text">"${escapeHtml(line.text)}"</div>
+          `;
+          scriptList.appendChild(item);
+        });
+      }
+
+      // 4. JSON
+      const formattedJson = JSON.stringify({
+        sequence_id: data.sequence_id,
+        pages: data.pages
+      }, null, 2);
+      document.getElementById('json-code').textContent = formattedJson;
+
+      // Scroll smoothly to results
+      resultsSection.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function escapeHtml(text) {
+      return (text || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // Tabs logic
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    // Copy JSON
+    document.getElementById('btn-copy-json').addEventListener('click', () => {
+      const code = document.getElementById('json-code').textContent;
+      navigator.clipboard.writeText(code).then(() => {
+        alert('Prediction JSON copied to clipboard!');
+      });
+    });
+
+    // Download JSON
+    document.getElementById('btn-dl-json').addEventListener('click', () => {
+      const code = document.getElementById('json-code').textContent;
+      const blob = new Blob([code], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${latestData ? latestData.sequence_id : 'manga_pred'}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    // Lightbox modal for zoom
+    const modal = document.getElementById('modal');
+    const modalImg = document.getElementById('modal-img');
+    const modalClose = document.getElementById('modal-close');
+
+    [0, 1, 2].forEach(i => {
+      document.getElementById(`wrap-${i}`).addEventListener('click', () => {
+        const src = document.getElementById(`vis-img-${i}`).src;
+        if (src) {
+          modalImg.src = src;
+          modal.style.display = 'flex';
+        }
+      });
+    });
+
+    modalClose.addEventListener('click', () => modal.style.display = 'none');
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.style.display = 'none';
+    });
+  </script>
+</body>
+</html>

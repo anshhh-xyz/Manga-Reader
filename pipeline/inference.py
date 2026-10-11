@@ -48,21 +48,7 @@ def _get_panels(seq_id: str, page: int):
     return _load_panels().get(key)
 
 
-_SPK_MODEL = None
-_SPK_CFG = None
-
-def _get_speaker_model():
-    global _SPK_MODEL, _SPK_CFG
-    if _SPK_MODEL is None:
-        model_path = ROOT / "outputs" / "speakers" / "pairwise_xgb.json"
-        cfg_path = ROOT / "outputs" / "speakers" / "cluster_cfg.json"
-        if model_path.exists() and cfg_path.exists():
-            from xgboost import XGBClassifier
-            m = XGBClassifier()
-            m.load_model(str(model_path))
-            _SPK_MODEL = m
-            _SPK_CFG = json.loads(cfg_path.read_text(encoding="utf-8"))
-    return _SPK_MODEL, _SPK_CFG
+from speakers import cluster_assign
 
 
 def _find_panel(bbox, panels):
@@ -155,10 +141,8 @@ def predict_sequence(seq_id: str, min_conf: float = 0.3,
                 })
 
     # ── Speaker Diarization ────────────────────────────────────────────────────
-    model, cfg = _get_speaker_model() if assign_speakers_flag else (None, None)
-    if model is not None and cfg is not None and all_seq_boxes:
-        from speakers.character_memory import assign_speakers
-        labels = assign_speakers(all_seq_boxes, page_sizes, model, cfg)
+    if assign_speakers_flag and all_seq_boxes:
+        labels = cluster_assign(all_seq_boxes, page_sizes)
     else:
         labels = ["char1"] * len(all_seq_boxes)
 

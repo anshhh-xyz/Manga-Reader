@@ -93,3 +93,5 @@ $$\text{Raw Page Images} \xrightarrow{\text{PaddleOCR}} \text{XY-Cut Panels} \xr
 - **`joint_f1`**: **0.4625**
 - **`matched_token_coverage`**: **0.5966**
 
+using a sequential trancking system for speaker classification
+ instead od this spaces adn random heurestic approach why not use a sentimetn analysis model or a predictor/like a predctor based on next word and for example for a given sequence we assign some variables to speakers or first few dialogue and for the next dialogue we use teh analysis model/predictor model match its socre and tell me this si person X  or Y based on person X and Y previous response

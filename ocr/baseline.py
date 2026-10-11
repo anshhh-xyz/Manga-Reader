@@ -4,20 +4,58 @@ import json
 from pathlib import Path
 
 _engine = None
+_ENGINE_NAME = None   # track which backend is loaded
 
 
 def _get_engine():
-    global _engine
+    """Lazy-load OCR engine. Tries PaddleOCR first, falls back to EasyOCR."""
+    global _engine, _ENGINE_NAME
 
     if _engine is None:
-        from paddleocr import PaddleOCR
-        _engine = PaddleOCR(
-            lang="en",
-            use_textline_orientation=True,
-            enable_mkldnn=False,
-        )
+        try:
+            from paddleocr import PaddleOCR
+            _engine = PaddleOCR(
+                lang="en",
+                use_textline_orientation=True,
+                enable_mkldnn=False,
+            )
+            _ENGINE_NAME = "paddle"
+        except Exception:
+            # PaddleOCR not installed — use EasyOCR (always available)
+            from ocr.engines import EasyOCREngine
+            _engine = EasyOCREngine()
+            _ENGINE_NAME = "easyocr"
 
     return _engine
+
+
+def _run_engine(image_path: Path) -> list:
+    """Dispatch OCR to the loaded engine and return normalised box list."""
+    engine = _get_engine()
+
+    if _ENGINE_NAME == "paddle":
+        result = engine.predict(str(image_path))
+        boxes = []
+        for res in result:
+            data = res.json
+            if callable(data):
+                data = data()
+            data = data.get("res", data)
+            texts  = data.get("rec_texts", [])
+            scores = data.get("rec_scores", [])
+            polys  = data.get("rec_polys", data.get("dt_polys", []))
+            for pts, text, conf in zip(polys, texts, scores):
+                xs = [float(p[0]) for p in pts]
+                ys = [float(p[1]) for p in pts]
+                boxes.append({"box": [min(xs), min(ys), max(xs), max(ys)],
+                              "text": str(text), "conf": float(conf)})
+        return boxes
+
+    else:  # easyocr
+        ocr_boxes = engine.read(str(image_path))
+        return [{"box": [b.x0, b.y0, b.x1, b.y1],
+                 "text": b.text, "conf": b.conf}
+                for b in ocr_boxes]
 
 
 def ocr_page(image_path, cache_dir=None):
@@ -65,56 +103,6 @@ def ocr_page(image_path, cache_dir=None):
                     return boxes
 
     # -------------------------
-    # PaddleOCR 3.x inference
+    # Live OCR (PaddleOCR or EasyOCR fallback)
     # -------------------------
-    result = _get_engine().predict(str(image_path))
-
-    boxes = []
-
-    for res in result:
-        data = res.json
-
-        if callable(data):
-            data = data()
-
-        # PaddleOCR 3.x stores OCR output under "res"
-        data = data.get("res", data)
-
-        texts = data.get("rec_texts", []) #get texts
-        scores = data.get("rec_scores", []) #get ocr scores
-        polys = data.get("rec_polys", data.get("dt_polys", [])) #get the coordinates
-
-        for pts, text, conf in zip(polys, texts, scores): #club all scores
-            xs = [float(p[0]) for p in pts] #chagne to rectangle
-            ys = [float(p[1]) for p in pts]
-
-            boxes.append(   #storing
-                {
-                    "box": [
-                        min(xs),
-                        min(ys),
-                        max(xs),
-                        max(ys),
-                    ],
-                    "text": str(text),
-                    "conf": float(conf),
-                }
-            )
-
-    # -------------------------
-    # Save cache
-    # -------------------------
-    if cache:
-        cache.parent.mkdir(parents=True, exist_ok=True)
-
-        cache.write_text(
-            json.dumps(boxes, ensure_ascii=False, indent=2),
-            encoding="utf-8",
-        )
-
-    return boxes
-
-
-    """Reads tge manga page and find coordinates of the boxes , not making an engine evertime as it is expensive,make one engine and reuse
-    convert ocr detected polygons to rectangular boxes create a cache folder to prevent re assessing of an image through , and any future chanfes 
-    can be loaded through cache"""
+    return _run_engine(image_path)
