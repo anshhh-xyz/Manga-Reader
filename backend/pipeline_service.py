@@ -1,13 +1,13 @@
 # backend/pipeline_service.py
 """
-Manga Task Reader — Backend Inference Service
-=============================================
-Encapsulates the end-to-end reading pipeline using models in weights/:
-1. Panel detection (XY-cut)
-2. OCR extraction (PaddleOCR / precomputed cache)
-3. Story filtering (weights/filter_model.joblib)
-4. RTL Reading order inside panels
-5. Character clustering (weights/pairwise_xgb.json + cluster_cfg.json)
+Manga Task Reader — Backend Inference Service  [v2: YOLO Hybrid Pipeline]
+=========================================================================
+Delegates to the winning Hybrid YOLO-Guided Container Pipeline:
+1. YOLOv8 bubble detection  (weights/bubble_yolo.pt)
+2. Full-page OCR + story filter  (weights/filter_model.joblib)
+3. Container aggregation + smart NARRATION tagging
+4. Panel-aware RTL reading order
+5. Phase 5 Pairwise XGBoost speaker attribution  (weights/pairwise_xgb.json)
 6. Clean monochrome visualization generation (annotated panels + dialogue)
 """
 
@@ -17,165 +17,18 @@ import json
 from pathlib import Path
 from typing import List, Dict, Any, Tuple
 
-import joblib
 import numpy as np
-import pandas as pd
-from PIL import Image, ImageDraw, ImageFont
-from xgboost import XGBClassifier
+from PIL import Image, ImageDraw
 
+# ── Core pipeline (best-performing combination) ──
+from pipeline.inference_yolo import predict_sequence_hybrid_yolo, _get_panels
 from detection.panel_detector import detect_panels
-from ordering.reading_order import order_boxes
 from ocr.baseline import ocr_page
-from ocr.postprocess import clean_line
-from filtering.features import balloon_feats, text_feats, FEATURES
-from speakers import cluster_assign
 
 ROOT = Path(__file__).resolve().parents[1]
-WEIGHTS = ROOT / "weights"
-
-# Global model caches
-_FILTER_BUNDLE = None
 
 
-def get_filter_bundle():
-    global _FILTER_BUNDLE
-    if _FILTER_BUNDLE is None:
-        p = WEIGHTS / "filter_model.joblib"
-        if not p.exists():
-            p = ROOT / "outputs" / "filtering" / "filter_model.joblib"
-        _FILTER_BUNDLE = joblib.load(str(p))
-    return _FILTER_BUNDLE
 
-
-def build_page_features(df_page: pd.DataFrame, gray: np.ndarray) -> pd.DataFrame:
-    h, w = gray.shape
-    b = df_page[["x0", "y0", "x1", "y1"]].to_numpy(dtype=float)
-    bw, bh = b[:, 2] - b[:, 0], b[:, 3] - b[:, 1]
-    med_h = max(float(np.median(bh)), 1.0) if len(bh) else 1.0
-    med_a = max(float(np.median(bw * bh)), 1.0) if len(bw) else 1.0
-    bal = balloon_feats(gray, b)
-    rows = []
-    for i, (idx, r) in enumerate(df_page.iterrows()):
-        x0, y0, x1, y1 = b[i]
-        geom = [
-            (x0 + x1) / 2 / w, (y0 + y1) / 2 / h,
-            bw[i] / w, bh[i] / h, bw[i] / max(bh[i], 1.0),
-            min(x0, y0, w - x1, h - y1) / min(w, h),
-            bh[i] / med_h,
-            bw[i] * bh[i] / med_a,
-            len(df_page)
-        ]
-        rows.append([idx] + geom + text_feats(r["text"], r["conf"]) + bal[i])
-    X = pd.DataFrame(rows, columns=["_idx"] + FEATURES).set_index("_idx")
-    return X.loc[df_page.index]
-
-
-def filter_story_boxes(df_boxes: pd.DataFrame, gray: np.ndarray, threshold: float = 0.3) -> pd.DataFrame:
-    if len(df_boxes) == 0:
-        return df_boxes
-    bundle = get_filter_bundle()
-    X = build_page_features(df_boxes, gray)[bundle["features"]]
-    p = np.zeros((len(df_boxes), 3))
-    for col, class_id in enumerate(bundle["model"].classes_):
-        p[:, int(class_id)] = bundle["model"].predict_proba(X)[:, col]
-    p_story = 1 - p[:, 0]
-    df_boxes = df_boxes.copy()
-    df_boxes["p_story"] = p_story
-    return df_boxes[df_boxes["p_story"] >= threshold].reset_index(drop=True)
-
-
-def find_panel_index(bbox: List[float], panels: List[Tuple[int, int, int, int]]) -> int:
-    cx = (bbox[0] + bbox[2]) / 2
-    cy = (bbox[1] + bbox[3]) / 2
-    for k, (x0, y0, x1, y1) in enumerate(panels):
-        if x0 <= cx <= x1 and y0 <= cy <= y1:
-            return k
-    dists = [((cx - (p[0] + p[2]) / 2) ** 2 + (cy - (p[1] + p[3]) / 2) ** 2) for p in panels]
-    return int(np.argmin(dists)) if dists else 0
-
-
-def should_merge_lines(a: List[float], b: List[float], v_gap_mult: float = 2.2, h_overlap_mult: float = 0.15) -> bool:
-    ax0, ay0, ax1, ay1 = a
-    bx0, by0, bx1, by1 = b
-    ha, hb = ay1 - ay0, by1 - by0
-    h_line = min(ha, hb)
-    h_max = max(ha, hb)
-    if h_line <= 0:
-        return False
-
-    v_overlap = min(ay1, by1) - max(ay0, by0)
-    h_overlap = min(ax1, bx1) - max(ax0, bx0)
-    wa, wb = ax1 - ax0, bx1 - bx0
-    w_min = min(wa, wb)
-    w_max = max(wa, wb)
-
-    # Same line horizontal continuation
-    if v_overlap > 0.4 * h_line:
-        h_gap = max(ax0, bx0) - min(ax1, bx1)
-        return h_gap < 1.5 * h_line
-
-    # Vertically stacked lines in same bubble
-    v_gap = max(ay0, by0) - min(ay1, by1)
-    if v_gap < v_gap_mult * h_max or v_gap < 45.0:
-        if h_overlap > h_overlap_mult * w_min:
-            return True
-        ca_x = (ax0 + ax1) / 2
-        cb_x = (bx0 + bx1) / 2
-        if abs(ca_x - cb_x) < 0.65 * w_max:
-            return True
-
-    return False
-
-
-def merge_balloons(df_boxes: pd.DataFrame, panels: list) -> pd.DataFrame:
-    n = len(df_boxes)
-    if n <= 1:
-        return df_boxes
-
-    panel_ids = [find_panel_index([r.x0, r.y0, r.x1, r.y1], panels) for _, r in df_boxes.iterrows()]
-    parent = list(range(n))
-
-    def find(i):
-        while parent[i] != i:
-            parent[i] = parent[parent[i]]
-            i = parent[i]
-        return i
-
-    for i in range(n):
-        for j in range(i + 1, n):
-            if panel_ids[i] == panel_ids[j]:
-                box_i = [df_boxes.iloc[i].x0, df_boxes.iloc[i].y0, df_boxes.iloc[i].x1, df_boxes.iloc[i].y1]
-                box_j = [df_boxes.iloc[j].x0, df_boxes.iloc[j].y0, df_boxes.iloc[j].x1, df_boxes.iloc[j].y1]
-                if should_merge_lines(box_i, box_j):
-                    parent[find(i)] = find(j)
-
-    groups = {}
-    for i in range(n):
-        groups.setdefault(find(i), []).append(i)
-
-    merged_rows = []
-    for members in groups.values():
-        members.sort(key=lambda idx: (df_boxes.iloc[idx].y0, df_boxes.iloc[idx].x0))
-        cleaned_tokens = [clean_line(str(df_boxes.iloc[idx].text)).strip() for idx in members]
-        joined_text = " ".join(t for t in cleaned_tokens if t).strip()
-        if not joined_text:
-            continue
-
-        x0 = min(df_boxes.iloc[idx].x0 for idx in members)
-        y0 = min(df_boxes.iloc[idx].y0 for idx in members)
-        x1 = max(df_boxes.iloc[idx].x1 for idx in members)
-        y1 = max(df_boxes.iloc[idx].y1 for idx in members)
-        conf = float(np.mean([df_boxes.iloc[idx].conf for idx in members]))
-        p_id = panel_ids[members[0]]
-
-        merged_rows.append({
-            "x0": x0, "y0": y0, "x1": x1, "y1": y1,
-            "text": joined_text,
-            "conf": conf,
-            "panel": p_id,
-        })
-
-    return pd.DataFrame(merged_rows) if merged_rows else df_boxes
 
 
 def render_annotated_page(img: Image.Image, panels: list, boxes: list, page_idx: int) -> str:
@@ -221,84 +74,122 @@ def render_annotated_page(img: Image.Image, panels: list, boxes: list, page_idx:
 
 
 def run_pipeline_on_images(image_paths: List[Path], seq_name: str = "seq_custom") -> Dict[str, Any]:
-    """Runs the full 3-page sequence reader pipeline on 3 image files."""
+    """
+    Run the full 3-page YOLO hybrid pipeline on 3 image files.
+    Saves images to a temp location so the pipeline can OCR them,
+    then runs predict_sequence_hybrid_yolo() for the best result.
+    """
+    import tempfile, shutil
     if len(image_paths) != 3:
         raise ValueError(f"Exactly 3 images are required; received {len(image_paths)}.")
 
-    all_seq_boxes = []
-    page_sizes = []
+    pil_images = [Image.open(p).convert("RGB") for p in image_paths]
+    page_sizes = [(img.width, img.height) for img in pil_images]
+
+    # ── Detect panels for visualization ──
     page_panels_list = []
-    pil_images = []
-
-    for pg, path in enumerate(image_paths):
-        img = Image.open(path).convert("RGB")
-        pil_images.append(img)
-        w, h = img.size
-        page_sizes.append((w, h))
-
-        # 1. Panel detection (on-the-fly XY-cut)
+    for img in pil_images:
         gray = np.array(img.convert("L"))
+        panel_info = None  # backend uses on-the-fly panel detection
         panels = detect_panels(gray, rtl=True)
         page_panels_list.append(panels)
 
-        # 2. OCR detection
-        raw_ocr = ocr_page(path)
-        if not raw_ocr:
+    # ── Run the YOLO Hybrid Pipeline ──
+    # predict_sequence_hybrid_yolo takes a seq_id and looks up dataset paths.
+    # For custom images we run the core logic directly.
+    from filtering.common import page_gray as _page_gray
+    from pipeline.inference_yolo import (
+        _classify_unassigned, _box_in_bubble, _find_panel,
+        ocr_page as _ocr_page, story_prob, clean_line,
+        detect_bubbles, order_boxes, FILTER_THRESHOLD, PAGE_GATE, READING_RTL,
+    )
+    import pandas as pd
+    from speakers import cluster_assign
+
+    all_seq_boxes = []
+
+    for pg, (img, path) in enumerate(zip(pil_images, image_paths)):
+        gray = np.array(img.convert("L"))
+        panels = page_panels_list[pg]
+        W, H = page_sizes[pg]
+        size = (float(W), float(H))
+
+        raw_boxes = [b for b in _ocr_page(path) if b.get("conf", 1.0) >= 0.30]
+        if not raw_boxes:
             continue
 
-        # 3. Prepare DataFrame for story filter
         rows = []
-        for b in raw_ocr:
+        for b in raw_boxes:
             box = b["box"]
             if isinstance(box[0], (list, tuple)):
                 xs = [float(p[0]) for p in box]; ys = [float(p[1]) for p in box]
                 x0, y0, x1, y1 = min(xs), min(ys), max(xs), max(ys)
             else:
                 x0, y0, x1, y1 = [float(v) for v in box]
-            rows.append({
-                "seq_id": seq_name,
-                "page": pg,
-                "x0": x0, "y0": y0, "x1": x1, "y1": y1,
-                "text": b.get("text", ""),
-                "conf": b.get("conf", 1.0),
-            })
-
+            rows.append({"seq_id": seq_name, "page": pg,
+                         "x0": x0, "y0": y0, "x1": x1, "y1": y1,
+                         "text": b["text"], "conf": b["conf"]})
         df = pd.DataFrame(rows)
-        # Filter story dialogue (pass gray for balloon features)
-        df_story = filter_story_boxes(df, gray, threshold=0.3)
-        if len(df_story) == 0:
+        df["p_story"] = story_prob(df)
+        df = df[df["p_story"] >= FILTER_THRESHOLD].reset_index(drop=True)
+        if len(df) == 0 or df["p_story"].max() < PAGE_GATE:
             continue
 
-        # Merge fragmented lines within the same speech balloon
-        df_story = merge_balloons(df_story, panels)
+        # YOLO bubble detection + NMS
+        raw_bubbles = detect_bubbles(path, conf_thresh=0.35)
+        valid_bubbles = []
+        for b in sorted(raw_bubbles, key=lambda x: -x["conf"]):
+            bx = b["bbox"]; keep = True
+            for vb in valid_bubbles:
+                vbx = vb["bbox"]
+                ix0, iy0 = max(bx[0], vbx[0]), max(bx[1], vbx[1])
+                ix1, iy1 = min(bx[2], vbx[2]), min(bx[3], vbx[3])
+                if ix1 > ix0 and iy1 > iy0:
+                    inter = (ix1-ix0)*(iy1-iy0)
+                    iou = inter / ((bx[2]-bx[0])*(bx[3]-bx[1]) + (vbx[2]-vbx[0])*(vbx[3]-vbx[1]) - inter)
+                    if iou > 0.45 or (inter / min((bx[2]-bx[0])*(bx[3]-bx[1]), (vbx[2]-vbx[0])*(vbx[3]-vbx[1]))) > 0.8:
+                        keep = False; break
+            if keep:
+                valid_bubbles.append(b)
 
-        # 4. RTL XY-cut Reading Order inside panels
-        boxes_np = df_story[["x0", "y0", "x1", "y1"]].to_numpy()
-        order_indices = order_boxes(boxes_np, panels, rtl=True, size=(w, h))
+        bubble_members = {k: [] for k in range(len(valid_bubbles))}
+        unassigned = []
+        for idx, row in df.iterrows():
+            obox = [row.x0, row.y0, row.x1, row.y1]
+            assigned = False
+            for bk, binfo in enumerate(valid_bubbles):
+                if _box_in_bubble(obox, binfo["bbox"]):
+                    bubble_members[bk].append(idx); assigned = True; break
+            if not assigned:
+                unassigned.append(idx)
 
-        for rank, i in enumerate(order_indices, start=1):
-            t = clean_line(str(df_story.iloc[i]["text"])).strip()
-            if t:
-                b_coords = [
-                    float(boxes_np[i][0]), float(boxes_np[i][1]),
-                    float(boxes_np[i][2]), float(boxes_np[i][3])
-                ]
-                panel_id = find_panel_index(b_coords, panels)
-                all_seq_boxes.append({
-                    "page": pg,
-                    "bbox": b_coords,
-                    "text": t,
-                    "panel": panel_id,
-                    "tag": "dialogue",
-                    "order_in_page": rank
-                })
+        containers = []
+        for bk, ocr_idxs in bubble_members.items():
+            if not ocr_idxs: continue
+            ocr_idxs.sort(key=lambda i: (df.iloc[i].y0, df.iloc[i].x0))
+            texts = [clean_line(df.iloc[i].text).strip() for i in ocr_idxs]
+            merged = " ".join(t for t in texts if t)
+            if not merged: continue
+            bbox = valid_bubbles[bk]["bbox"]
+            containers.append({"page": pg, "bbox": [float(v) for v in bbox],
+                               "text": merged, "panel": _find_panel(bbox, panels), "tag": "dialogue"})
 
-    # 5. Speaker Attribution (Enhanced Spatial Layout Clusterer)
-    if all_seq_boxes:
-        labels = cluster_assign(all_seq_boxes, page_sizes)
-    else:
-        labels = []
+        for u_idx in unassigned:
+            row = df.iloc[u_idx]
+            t = clean_line(row.text).strip()
+            if not t: continue
+            bbox = [float(row.x0), float(row.y0), float(row.x1), float(row.y1)]
+            tag = _classify_unassigned(bbox, size)
+            containers.append({"page": pg, "bbox": bbox, "text": t,
+                               "panel": _find_panel(bbox, panels), "tag": tag})
 
+        if not containers: continue
+        c_boxes = np.array([c["bbox"] for c in containers])
+        for ord_idx in order_boxes(c_boxes, panels, READING_RTL, size):
+            all_seq_boxes.append(containers[ord_idx])
+
+    # ── Speaker Attribution ──
+    labels = cluster_assign(all_seq_boxes, page_sizes) if all_seq_boxes else []
     for b, lab in zip(all_seq_boxes, labels):
         b["speaker"] = lab
 

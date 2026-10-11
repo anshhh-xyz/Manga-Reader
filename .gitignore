@@ -35,3 +35,6 @@ desktop.ini
 
 # Zip output (don't commit the zip itself)
 *.zip
+
+# Large experimental LLM/VLM weights (>100MB)
+weights/extras/weights-extras-qwen/

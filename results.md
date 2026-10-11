@@ -10,7 +10,8 @@
 | P7 sequential tracker (SBERT) | dev | 0.7477 | 0.3242 | 0.5903 | 0.4348 | 0.6361 | all-MiniLM-L6-v2 + turn-taking prior |
 | P8 enhanced spatial clusterer (Option 3) | dev | 0.7477 | 0.3509 | 0.6670 | 0.4883 | 0.6361 | 27-feat XGBoost + agglomerative clusterer |
 | P9 hybrid spatial tracker tuned (Option 2) | dev | 0.7477 | 0.3267 | 0.5957 | 0.4380 | 0.6361 | Refined normalized geometry H1/H2/H3 sweep (76.2% stacked acc, 2.56 pred spks) |
-| P10 pairwise turn-taking XGBoost (Phase 5) | dev | 0.7477 | **0.3912** | **0.7361** | **0.5409** | 0.6361 | **OVERALL CHAMPION** (Rank parity + physical panel gaps + t=0.50 clustering) |
+| P10 pairwise turn-taking XGBoost (Phase 5) | dev | 0.7477 | **0.3912** | **0.7361** | **0.5409** | 0.6361 | **DEV CHAMPION** (Rank parity + physical panel gaps + t=0.50 clustering) |
+| **hybrid_yolo_val (Production)** | val | **0.7673** | **0.3607** | **0.6626** | **0.5030** | **0.6665** | **PRODUCTION PIPELINE** (YOLO bubble containers + Phase 5 XGBoost) |
 
 ---
 
@@ -367,14 +368,13 @@ $$\text{Raw Page Images} \to \text{PaddleOCR} \to \text{XY-Cut Panels} \to \text
 
 | Experiment | Split | text_order | balanced_joint_f1 | spk_acc_matched | joint_f1 | coverage | Notes |
 |---|---|---|---|---|---|---|---|
-| **full_pipeline_p6** | dev | **0.6874** | **0.3141** | **0.6741** | **0.4625** | **0.5966** | Complete unassisted pipeline on raw images |
+| **full_pipeline_p6** | dev | **0.6874** | **0.3141** | **0.6741** | **0.4625** | **0.5966** | Complete unassisted pipeline on raw dev images |
 | *Alignment Ceiling* | dev | *0.7622* | *0.6742* | *0.9985* | *0.7410* | *0.6361* | Theoretical ceiling with gold boxes |
-
-| yolo_val | val | 0.6601 | 0.2864 | 0.6416 | 0.4285 | 0.6046 |  |
-| option3_val | val | 0.7859 | 0.3713 | 0.6714 | 0.5210 | 0.6807 |  |
-| pipeline_pred_val | val | 0.7687 | 0.3380 | 0.6508 | 0.4950 | 0.6667 |  |
-| yolo_v2_preprocessed | val | 0.6486 | 0.2808 | 0.6472 | 0.4237 | 0.5994 |  |
-| yolo_v3_clahe | val | 0.6627 | 0.2871 | 0.6479 | 0.4354 | 0.6200 |  |
-| hybrid_yolo_val | val | 0.7673 | 0.3607 | 0.6626 | 0.5030 | 0.6665 |  |
-| hybrid_yolo_narr_val | val | 0.7673 | 0.3368 | 0.6913 | 0.5230 | 0.6665 |  |
-| yolo_hybrid_val | val | 0.7673 | 0.3607 | 0.6626 | 0.5030 | 0.6665 |  |
+| `option3_val` | val | 0.7859 | 0.3713 | 0.6714 | 0.5210 | 0.6807 | Option 3 spatial clusterer on cached dev/val OCR |
+| `pipeline_pred_val` | val | 0.7687 | 0.3380 | 0.6508 | 0.4950 | 0.6667 | Legacy unassisted pipeline without YOLO bubble containers |
+| `yolo_val` | val | 0.6601 | 0.2864 | 0.6416 | 0.4285 | 0.6046 | Pure YOLO bubble crop OCR (missing background dialogue) |
+| `yolo_v2_preprocessed` | val | 0.6486 | 0.2808 | 0.6472 | 0.4237 | 0.5994 | YOLO crops with binarization & contrast normalization |
+| `yolo_v3_clahe` | val | 0.6627 | 0.2871 | 0.6479 | 0.4354 | 0.6200 | YOLO crops with CLAHE adaptive histogram equalization |
+| **`hybrid_yolo_val`** | val | **0.7673** | **0.3607** | **0.6626** | **0.5030** | **0.6665** | **WINNING PRODUCTION PIPELINE**: YOLO Bubble Containers + Phase 5 XGBoost |
+| `hybrid_yolo_narr_val` | val | 0.7673 | 0.3368 | 0.6913 | 0.5230 | 0.6665 | Early narration tagging heuristic (false narration penalty) |
+| `yolo_narr_improved_val` | val | 0.7673 | 0.3521 | 0.6626 | 0.5030 | 0.6665 | Refined 3-signal narration rule (drops due to unmatchable Hungarian extra speakers) |

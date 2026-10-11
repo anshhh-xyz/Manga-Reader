@@ -1,4 +1,30 @@
-pillow
-numpy
-pandas
-opencv-python
+# Core Scientific & Data Processing
+numpy>=1.26.0
+pandas>=2.0.0
+scipy>=1.12.0
+scikit-learn>=1.4.0
+joblib>=1.3.0
+
+# Computer Vision & Image Processing
+pillow>=10.0.0
+opencv-python>=4.8.0
+
+# Deep Learning & Object Detection
+torch>=2.0.0
+torchvision>=0.15.0
+ultralytics>=8.1.0
+xgboost>=2.0.0
+
+# Optical Character Recognition
+easyocr>=1.7.0
+
+# Web Backend & Serving
+fastapi>=0.110.0
+uvicorn>=0.28.0
+python-multipart>=0.0.9
+
+# Transformers & Embeddings (Auxiliary / Research)
+transformers>=4.40.0
+accelerate>=0.28.0
+peft>=0.10.0
+sentence-transformers>=2.5.0
