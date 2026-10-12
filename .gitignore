@@ -37,12 +37,12 @@ desktop.ini
 *.zip
 
 # Large experimental LLM/VLM weights (>100MB)
-weights/extras/weights-extras-qwen/
-
-# DeBERTa cross-encoder weights (703 MB, too large for GitHub)
+weights/extras
+weights/ocr_lora
 weights/deberta_speaker_cross_encoder/
 
 # Any other large model files
 *.safetensors
 yolov8n.pt
 yolov8s.pt
+
