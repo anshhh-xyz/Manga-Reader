@@ -3,15 +3,16 @@
 Primary Speaker Diarization Engine (Phase 5 XGBoost Pairwise + Turn-Taking Parity)
 ==================================================================================
 Best performing speaker attribution model:
-  - balanced_joint_f1: 0.3912
-  - speaker_accuracy_on_matched: 0.7361 (73.61%)
-  - joint_f1: 0.5409
+  - balanced_joint_f1: 0.3607  (22-feature baseline)
+  - balanced_joint_f1: 0.3604  (P12 Decoupled Crop OCR + Typography, record holder)
 
-Key features:
+Key features (22 / 26 total):
 1. Turn-taking rank parity ((j - i) % 2) within reading order.
 2. Physical panel boundaries and gap analysis (same_panel, panel_gap, pp_gap).
 3. Geometric spatial distance and relative bounding box area ratios.
 4. Agglomerative clustering with distance threshold t=0.50, singleton merging, and max_k=4.
+5. [OPTIONAL] DeBERTa-v3 cross-encoder hybrid fusion via use_cross_encoder=True.
+   Blends: P_final = ce_alpha * P_deberta + (1 - ce_alpha) * P_spatial
 """
 
 from __future__ import annotations
@@ -46,16 +47,19 @@ def load_model():
     global _MODEL, _CFG
     if _MODEL is None:
         m_p = MODEL_PATH if MODEL_PATH.exists() else (ROOT / "outputs" / "speakers" / "pairwise_xgb.json")
-        c_p = CFG_PATH if CFG_PATH.exists() else (ROOT / "outputs" / "speakers" / "cluster_cfg.json")
         if not m_p.exists():
             raise FileNotFoundError(f"Pairwise model file not found at {m_p}")
         m = XGBClassifier()
         m.load_model(str(m_p))
         _MODEL = m
+
+    if _CFG is None:
+        c_p = CFG_PATH if CFG_PATH.exists() else (ROOT / "outputs" / "speakers" / "cluster_cfg.json")
         if c_p.exists():
             _CFG = json.loads(c_p.read_text(encoding="utf-8"))
         else:
             _CFG = DEFAULT_CFG.copy()
+
     return _MODEL, _CFG
 
 
@@ -65,7 +69,21 @@ def _geom(b: Dict, size: Tuple[float, float]):
     return ((x1 + x2) / 2.0 / W, (y1 + y2) / 2.0 / H, (x2 - x1) / W, (y2 - y1) / H)
 
 
-def extract_pair_features(boxes: List[Dict], sizes: List[Tuple[float, float]]):
+def extract_pair_features(
+    boxes: List[Dict],
+    sizes: List[Tuple[float, float]],
+    char_map: Optional[Dict[int, List[Dict]]] = None,
+):
+    """
+    Build pairwise feature matrix.
+
+    char_map: {page_idx -> [{bbox, conf}, ...]} from detection.char_detector.
+              If None, character proximity features are set to NaN (backward compat).
+
+    Returns (X of shape [n_pairs, 26], pairs list).
+    """
+    from detection.char_detector import nearest_char_features
+
     n = len(boxes)
     X, pairs = [], []
     g = [_geom(b, sizes[b.get("page", 0)]) for b in boxes]
@@ -75,6 +93,17 @@ def extract_pair_features(boxes: List[Dict], sizes: List[Tuple[float, float]]):
         k = (b.get("page", 0), b.get("panel", -1))
         pos.append(seen[k])
         seen[k] += 1
+
+    # Pre-compute per-bubble character proximity features
+    char_dists: List[float] = []
+    char_idxs: List[int] = []
+    for b in boxes:
+        pg = b.get("page", 0)
+        W, H = sizes[pg]
+        chars = (char_map or {}).get(pg, [])
+        d, cidx = nearest_char_features(b["bbox"], chars, W, H)
+        char_dists.append(d)
+        char_idxs.append(cidx)
 
     for i in range(n):
         for j in range(i + 1, n):
@@ -92,7 +121,7 @@ def extract_pair_features(boxes: List[Dict], sizes: List[Tuple[float, float]]):
 
             ta, tb = a.get("text") or "", b.get("text") or ""
 
-            # Exact 22 Phase 5 features matching pairwise_xgb.json
+            # ── Original 22 Phase-5 features ──────────────────────────────────
             feat = [
                 float(same_page),
                 float(abs(a.get("page", 0) - b.get("page", 0))),
@@ -109,10 +138,23 @@ def extract_pair_features(boxes: List[Dict], sizes: List[Tuple[float, float]]):
                 float("!" in ta), float("!" in tb),
                 np.nan,  # cos_sim placeholder
             ]
+
+            # ── 4 NEW character-proximity features (indices 22-25) ────────────
+            if char_map is not None and same_page:
+                ci, cj = char_idxs[i], char_idxs[j]
+                feat += [
+                    char_dists[i],                        # dist bubble_i → nearest char (norm)
+                    char_dists[j],                        # dist bubble_j → nearest char (norm)
+                    abs(char_dists[i] - char_dists[j]),   # proximity difference between pair
+                    float(ci >= 0 and ci == cj),          # do they share the same nearest char?
+                ]
+            else:
+                feat += [np.nan, np.nan, np.nan, np.nan]
+
             X.append(feat)
             pairs.append((i, j))
 
-    return np.array(X, dtype=float).reshape(-1, 22), pairs
+    return np.array(X, dtype=float).reshape(-1, 26), pairs
 
 
 def cluster_probabilities(P: np.ndarray, t: float = 0.50, merge_singletons: bool = True, max_k: int = 4) -> np.ndarray:
@@ -165,9 +207,23 @@ def cluster_assign(
     boxes: List[Dict],
     page_sizes: List = None,
     cfg: Optional[Dict] = None,
+    char_map: Optional[Dict[int, List[Dict]]] = None,
+    use_cross_encoder: bool = False,
+    ce_alpha: float = 0.5,
 ) -> List[str]:
     """
     Primary speaker assignment entry point.
+
+    Args:
+        boxes:             Ordered list of dialogue box dicts (page, bbox, text, tag).
+        page_sizes:        [(W, H), ...] per page.
+        cfg:               Optional override for clustering config.
+        char_map:          Optional {page_idx -> [{bbox, conf}]} from detect_chars().
+                           If provided, 4 character-proximity features are added.
+        use_cross_encoder: If True, blends XGBoost spatial probs with DeBERTa-v3
+                           cross-encoder probs: P = ce_alpha*P_text + (1-ce_alpha)*P_spatial
+        ce_alpha:          Weight for DeBERTa scores in the blend [0.0, 1.0].
+                           0.0 = pure XGBoost, 1.0 = pure DeBERTa, 0.5 = equal blend.
     """
     model, base_cfg = load_model()
     run_cfg = base_cfg.copy()
@@ -187,12 +243,25 @@ def cluster_assign(
         labels[story_idx[0]] = "char1"
         return labels
 
-    X, pairs = extract_pair_features(sub_boxes, page_sizes)
+    X, pairs = extract_pair_features(sub_boxes, page_sizes, char_map=char_map)
+
+    # Backward compat: if current model expects 22 features, truncate silently
+    n_model_features = model.n_features_in_
+    if X.shape[1] != n_model_features:
+        X = X[:, :n_model_features]
+
     probs = model.predict_proba(X)[:, 1]
 
-    P = np.eye(len(sub_boxes))
+    P_spatial = np.eye(len(sub_boxes))
     for (i, j), p in zip(pairs, probs):
-        P[i, j] = P[j, i] = p
+        P_spatial[i, j] = P_spatial[j, i] = p
+
+    if use_cross_encoder:
+        from speakers.cross_encoder_infer import build_probability_matrix
+        P_text = build_probability_matrix(sub_boxes)
+        P = ce_alpha * P_text + (1.0 - ce_alpha) * P_spatial
+    else:
+        P = P_spatial
 
     assigned = relabel(
         cluster_probabilities(

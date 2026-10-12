@@ -34,14 +34,24 @@ from ocr.postprocess import clean_line
 from filtering.infer_filter import story_prob
 from filtering.common import page_gray
 from ordering.reading_order import order_boxes
-from detection.bubble_ocr import detect_bubbles
+from detection.bubble_ocr import detect_bubbles, preprocess_crop
 from detection.panel_detector import detect_panels
 from speakers import cluster_assign
+from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
 
 _panels_path = ROOT / PANELS_PATH if not Path(PANELS_PATH).is_absolute() else Path(PANELS_PATH)
 _PANELS: Optional[Dict] = None
+_EASYOCR_READER = None
+
+
+def _get_crop_reader():
+    global _EASYOCR_READER
+    if _EASYOCR_READER is None:
+        from ocr.engines import EasyOCREngine
+        _EASYOCR_READER = EasyOCREngine()
+    return _EASYOCR_READER
 
 
 def _load_panels() -> Dict:
@@ -89,10 +99,11 @@ def _classify_unassigned(bbox: List[float], page_size: tuple) -> str:
 def predict_sequence_hybrid_yolo(
     seq_id: str,
     yolo_conf: float = 0.35,
-    min_ocr_conf: float = 0.30,
+    min_ocr_conf: float = 0.25,
     iou_nms: float = 0.45,
     postprocess: bool = True,
     assign_speakers_flag: bool = True,
+    crop_recovery: bool = True,
 ) -> list:
     """
     Run the Hybrid YOLO Container-First manga reading pipeline for one sequence.
@@ -184,21 +195,58 @@ def predict_sequence_hybrid_yolo(
 
         # 5. Form Utterance Containers (Aggregated Bubbles + Unassigned Story Boxes)
         containers: List[Dict] = []
+        im_pil: Optional[Image.Image] = None
+
         for bk, ocr_idxs in bubble_members.items():
-            if not ocr_idxs:
-                continue
-            # Sort OCR lines top-to-bottom within bubble
-            ocr_idxs.sort(key=lambda i: (df.iloc[i].y0, df.iloc[i].x0))
-            texts = [
-                (clean_line(df.iloc[i].text) if postprocess else df.iloc[i].text).strip()
-                for i in ocr_idxs
-            ]
-            merged_text = " ".join(t for t in texts if t)
+            bbox = valid_bubbles[bk]["bbox"]
+            bw = bbox[2] - bbox[0]
+            panel_id = _find_panel(bbox, panels)
+            merged_text = ""
+
+            # Detect wide cross-bubble bleed across multiple speech bubble columns
+            is_cross_bleed = False
+            if ocr_idxs and crop_recovery:
+                for oi in ocr_idxs:
+                    ow = df.iloc[oi].x1 - df.iloc[oi].x0
+                    if ow > 1.35 * bw or (ow > 180 and bw < 140):
+                        is_cross_bleed = True
+                        break
+
+            if ocr_idxs and not is_cross_bleed:
+                # Sort OCR lines top-to-bottom within bubble
+                ocr_idxs.sort(key=lambda i: (df.iloc[i].y0, df.iloc[i].x0))
+                texts = [
+                    (clean_line(df.iloc[i].text) if postprocess else df.iloc[i].text).strip()
+                    for i in ocr_idxs
+                ]
+                merged_text = " ".join(t for t in texts if t)
+            elif crop_recovery and (is_cross_bleed or not ocr_idxs) and valid_bubbles[bk]["conf"] >= 0.40:
+                # Zoomed crop OCR recovery on empty or bleed-polluted bubble
+                if im_pil is None:
+                    im_pil = Image.open(img)
+                bx0 = max(0, int(bbox[0] - 4))
+                by0 = max(0, int(bbox[1] - 4))
+                bx1 = min(int(w), int(bbox[2] + 4))
+                by1 = min(int(h), int(bbox[3] + 4))
+                if bx1 > bx0 + 8 and by1 > by0 + 8:
+                    crop = im_pil.crop((bx0, by0, bx1, by1))
+                    prep = preprocess_crop(crop, target_side=256)
+                    reader = _get_crop_reader()
+                    res = reader.reader.readtext(prep)
+                    words = [
+                        (clean_line(r[1]) if postprocess else r[1]).strip()
+                        for r in res
+                        if clean_line(r[1]).strip()
+                    ]
+                    words = [w for w in words if any(c.isalnum() for c in w)]
+                    merged_text = " ".join(words)
+                    # Filter short noise; require at least 3 alphabetic letters
+                    if sum(c.isalpha() for c in merged_text) < 3:
+                        merged_text = ""
+
             if not merged_text or not scorer.norm(merged_text):
                 continue
 
-            bbox = valid_bubbles[bk]["bbox"]
-            panel_id = _find_panel(bbox, panels)
             containers.append({
                 "page": pg,
                 "bbox": [float(v) for v in bbox],
@@ -252,6 +300,7 @@ if __name__ == "__main__":
     ap.add_argument("--conf", type=float, default=0.35, help="YOLO bubble conf threshold")
     ap.add_argument("--no-post", action="store_true", help="Skip OCR post-processing")
     ap.add_argument("--no-speakers", action="store_true", help="Skip speaker diarization")
+    ap.add_argument("--no-crop-recovery", action="store_true", help="Disable zoomed bubble crop recovery")
     ap.add_argument("--json",      default=None,   help="Optional output JSON array path (e.g. submission.json)")
     args = ap.parse_args()
 
@@ -263,6 +312,7 @@ if __name__ == "__main__":
             yolo_conf=args.conf,
             postprocess=not args.no_post,
             assign_speakers_flag=not args.no_speakers,
+            crop_recovery=not args.no_crop_recovery,
         )
         print(f"[{n}/{len(ids)}] {sid}")
 

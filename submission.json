@@ -10,105 +10,105 @@
       ],
       [
         {
-          "speaker": "char1",
+          "speaker": "char2",
           "text": "You"
         },
         {
-          "speaker": "char1",
+          "speaker": "char2",
           "text": "FAKED"
         },
         {
-          "speaker": "char1",
+          "speaker": "char2",
           "text": "AREN'T You In HACHI- KEN!?"
         },
         {
-          "speaker": "char1",
+          "speaker": "char2",
           "text": "FAKED"
         },
         {
-          "speaker": "char1",
+          "speaker": "char2",
           "text": "WHY"
         },
         {
-          "speaker": "char1",
+          "speaker": "char2",
           "text": "You!"
         },
         {
-          "speaker": "char1",
+          "speaker": "char2",
           "text": "Im SKIPPING CATCHING UP ON STUDIES WILL BE EASY:"
         },
         {
-          "speaker": "char1",
+          "speaker": "char2",
           "text": "YEAH"
         },
         {
-          "speaker": "char1",
-          "text": "ARE YOU REALLY DROP_ OUT?"
+          "speaker": "char2",
+          "text": "ARE YOU REALLY DROP. OUT?"
         },
         {
-          "speaker": "char1",
+          "speaker": "char2",
           "text": "I ALREADY TALKED To ALL THE TEACHERS ABOUT IT"
         },
         {
-          "speaker": "char1",
+          "speaker": "char2",
           "text": "AND AROUND, SO I WAITED FOR YOU To ShHOW UP AND I WAS RIGHT!"
         },
         {
-          "speaker": "char1",
+          "speaker": "char2",
           "text": "Ku"
         },
         {
-          "speaker": "char1",
+          "speaker": "char2",
           "text": "Gn"
         },
         {
-          "speaker": "char1",
+          "speaker": "char2",
           "text": "Anbush"
         },
         {
-          "speaker": "char1",
+          "speaker": "char2",
           "text": "WHY ARE YOU DROP- PING OUT?"
         }
       ],
       [
         {
-          "speaker": "char1",
+          "speaker": "char2",
           "text": "DIDNT THE TEACHER ALREADY? WE CANT PAY OFF OUR IM DEBTS, So WE LOST THE FARM"
         },
         {
-          "speaker": "char1",
+          "speaker": "char2",
           "text": "BUT YOUR TO FINISH HIGH SHE!? ARE YOU BEING SO STUBBORN ABOUT WORKING?"
         },
         {
-          "speaker": "char2",
+          "speaker": "char3",
           "text": "HAVE"
         },
         {
-          "speaker": "char2",
+          "speaker": "char3",
           "text": "TO WORK"
         },
         {
-          "speaker": "char2",
+          "speaker": "char3",
           "text": "To SAVE"
         },
         {
-          "speaker": "char2",
+          "speaker": "char3",
           "text": "AKI'S FAMILY? WHY IS THAT?"
         },
         {
-          "speaker": "char2",
+          "speaker": "char3",
           "text": "UP SOME"
         },
         {
-          "speaker": "char2",
-          "text": "MONEY _"
+          "speaker": "char3",
+          "text": "MONEY."
         },
         {
-          "speaker": "char2",
+          "speaker": "char3",
           "text": "IF I DONT, FAMILY."
         },
         {
-          "speaker": "char2",
+          "speaker": "char3",
           "text": "THOUGH I ALREADY HAVE, TO BE COMPLETELY HONEST"
         },
         {
@@ -117,7 +117,7 @@
         },
         {
           "speaker": "char2",
-          "text": "HE ASKED HIS cO- SIGNER_"
+          "text": "HE ASKED HIS cO- SIGNER."
         }
       ]
     ]
@@ -132,7 +132,11 @@
         },
         {
           "speaker": "char1",
-          "text": "OUR FARM EVEN IF WE TRIED TO SELL IT ALL OFF_ OUR cowS ARE MAKE MUCH: SELL FOR MUCH EITHER:"
+          "text": "IF ANYBODY Were To GET Hurt BECALSE OF something They Did For Me, ID FEEL AWFLL About"
+        },
+        {
+          "speaker": "char1",
+          "text": "OUR FARM EVEN IF WE TRIED TO SELL IT ALL OFF. OUR cowS ARE MAKE MUCH: SELL FOR MUCH EITHER:"
         },
         {
           "speaker": "char1",
@@ -144,7 +148,7 @@
         },
         {
           "speaker": "char1",
-          "text": "SO IM GOING To WORK_"
+          "text": "SO IM GOING To WORK."
         },
         {
           "speaker": "char2",
@@ -166,7 +170,7 @@
         },
         {
           "speaker": "char2",
-          "text": "BASE- BALL_ TAKING OVER THE"
+          "text": "BASE- BALL. TAKING OVER THE FARM .."
         },
         {
           "speaker": "char2",
@@ -227,16 +231,16 @@
           "text": "THOU Ght HE MIGhT"
         },
         {
-          "speaker": "char4",
+          "speaker": "char5",
           "text": "AH"
         },
         {
-          "speaker": "char4",
+          "speaker": "char5",
           "text": "THANK"
         },
         {
-          "speaker": "char4",
-          "text": "HACHI- KEN-KUN: BE SURE TO FINISH SCHOOL; OKAY?"
+          "speaker": "char5",
+          "text": "HACHI- KEN-KUN: BE SURE TO FINISH SCHOOL. OKAY?"
         }
       ]
     ]
@@ -247,7 +251,7 @@
       [
         {
           "speaker": "char1",
-          "text": "TAKE CARE_"
+          "text": "TAKE CARE."
         },
         {
           "speaker": "char1",
@@ -255,15 +259,15 @@
         },
         {
           "speaker": "char1",
-          "text": "THANK YOU FOR EVERY- THING_"
+          "text": "THANK YOU FOR EVERY- THING."
         },
         {
           "speaker": "char1",
-          "text": "DONT GIVE ME THAT LooK_"
+          "text": "DONT GIVE ME THAT LooK."
         },
         {
           "speaker": "char1",
-          "text": "ING ABOUT MUCH; YOU ARENT LNVE VERY LONG_"
+          "text": "ING ABOUT MUCH; YOU ARENT LNVE VERY LONG."
         },
         {
           "speaker": "char1",
@@ -281,7 +285,7 @@
       [
         {
           "speaker": "char1",
-          "text": "DON'T THAT CRAP_ YOU IDIOT"
+          "text": "DON'T THAT CRAP. YOU IDIOT"
         },
         {
           "speaker": "char1",
@@ -325,11 +329,15 @@
         },
         {
           "speaker": "char2",
-          "text": "EVERY LAST ONE OF YOU:_"
+          "text": "EVERY LAST ONE OF YOU:."
         },
         {
           "speaker": "char2",
           "text": "ALL YOU EVER SAY Is, \"THAT'S HOW OR \"IT CAN'T"
+        },
+        {
+          "speaker": "char2",
+          "text": "STop SPITTING OUt THAT BULLSHIT S0 BASILYW"
         },
         {
           "speaker": "char2",
@@ -339,7 +347,7 @@
       [
         {
           "speaker": "char1",
-          "text": "BECAUSE ABSOLUTELY YOU SAY CRAP LIKE THATH"
+          "text": "ABSOLUTELY YOU SAY CRAP LIKE THATH"
         }
       ]
     ]
@@ -384,7 +392,7 @@
         },
         {
           "speaker": "char1",
-          "text": "TOLD HIM NOT TO WORRY ABOUT Us; BUT YOU KNOW ICHIRO- CHAN_"
+          "text": "TOLD HIM NOT TO WORRY ABOUT Us. BUT YOU KNOW ICHIRO- CHAN."
         },
         {
           "speaker": "char1",
@@ -392,7 +400,7 @@
         },
         {
           "speaker": "char1",
-          "text": "JUST STUB- BORN_"
+          "text": "JUST STUB- BORN."
         },
         {
           "speaker": "char1",
@@ -403,22 +411,26 @@
           "text": "LETS JUST NOT TALK ABOUT ANY - MORE"
         },
         {
-          "speaker": "char1",
+          "speaker": "char2",
           "text": "OKAY?"
         },
         {
-          "speaker": "char1",
+          "speaker": "char2",
           "text": "FORGET ABOUT"
         },
         {
-          "speaker": "char2",
-          "text": "M_"
+          "speaker": "char3",
+          "text": "M."
         }
       ],
       [
         {
-          "speaker": "char2",
-          "text": "I DONt"
+          "speaker": "char3",
+          "text": "Let G0 OF The ReiNs"
+        },
+        {
+          "speaker": "char3",
+          "text": "I DONt WANT YOu To Be Bur- DENED BY This"
         },
         {
           "speaker": "char3",
@@ -426,7 +438,7 @@
         },
         {
           "speaker": "char3",
-          "text": "IDIOT_"
+          "text": "IDIOT."
         },
         {
           "speaker": "char3",
@@ -441,7 +453,11 @@
       [
         {
           "speaker": "char1",
-          "text": "PLEASE FoRGive Me_"
+          "text": "AK:. AHK."
+        },
+        {
+          "speaker": "char1",
+          "text": "PLEASE FoRGive Me."
         },
         {
           "speaker": "char1",
@@ -454,14 +470,22 @@
       ],
       [
         {
-          "speaker": "char1",
+          "speaker": "char2",
           "text": "TAMAKL"
         }
       ],
       [
         {
-          "speaker": "char1",
+          "speaker": "char3",
+          "text": "K-How"
+        },
+        {
+          "speaker": "char3",
           "text": "Mizue?"
+        },
+        {
+          "speaker": "char3",
+          "text": "Eeiiii"
         }
       ]
     ]
@@ -480,7 +504,7 @@
         },
         {
           "speaker": "char1",
-          "text": "Mizue_ SAM?"
+          "text": "Mizue. SAM?"
         },
         {
           "speaker": "char1",
@@ -493,21 +517,21 @@
           "text": "Ill Do ANYTHING To Atonel"
         },
         {
-          "speaker": "char1",
+          "speaker": "char2",
           "text": "NOT GOODI"
         },
         {
-          "speaker": "char1",
+          "speaker": "char2",
           "text": "SFX: Grip"
         }
       ],
       [
         {
-          "speaker": "char2",
+          "speaker": "char3",
           "text": "WHAT?!"
         },
         {
-          "speaker": "char2",
+          "speaker": "char3",
           "text": "SFX: Sizzle"
         }
       ]
@@ -525,7 +549,7 @@
       [
         {
           "speaker": "char1",
-          "text": "Mizue_ SAMAI"
+          "text": "Mizue. SAMAI"
         }
       ],
       [
@@ -543,7 +567,11 @@
         },
         {
           "speaker": "char3",
-          "text": "DAMN it_"
+          "text": "AGhi"
+        },
+        {
+          "speaker": "char3",
+          "text": "DAMN it."
         }
       ]
     ]
@@ -554,11 +582,15 @@
       [
         {
           "speaker": "char1",
+          "text": "This IS The CLub WHERE NUTCRACKER HAS BEEN APPEAR- ING RECENTLY."
+        },
+        {
+          "speaker": "char1",
           "text": "DOESNT"
         },
         {
           "speaker": "char1",
-          "text": "COULD INSPIRE SENSEL; SOCIAL HAVE YOU AGORA - PHOBIA_ PLACE Like ThIS BEFORE"
+          "text": "COULD INSPIRE SENSEL. SOCIAL HAVE YOU AGORA - PHOBIA. PLACE Like ThIS BEFORE"
         },
         {
           "speaker": "char1",
@@ -566,130 +598,150 @@
         },
         {
           "speaker": "char1",
-          "text": "I DESPER- AteLy STOPPED AKirA-SAN WHEN SHE SAID ONLY ONE Drink\"_"
+          "text": "I DESPER- AteLy STOPPED AKirA-SAN WHEN SHE SAID ONLY ONE Drink\"."
+        },
+        {
+          "speaker": "char2",
+          "text": "HEY"
         }
       ],
       [
         {
           "speaker": "char2",
-          "text": "DO ALL OF US_"
+          "text": "DO ALL OF US."
         },
         {
           "speaker": "char2",
           "text": "Do Only I FeeL FUCKING PLACE"
         },
         {
-          "speaker": "char2",
+          "speaker": "char3",
+          "text": "HEY NOW:"
+        },
+        {
+          "speaker": "char3",
+          "text": "MO,NO YOULoCK CU , T"
+        },
+        {
+          "speaker": "char3",
           "text": "WATCH YOUR LANGUAGE,"
         },
         {
-          "speaker": "char2",
+          "speaker": "char3",
           "text": "BuT"
         },
         {
-          "speaker": "char2",
+          "speaker": "char3",
           "text": "RATHER, You Bitch,"
         },
         {
-          "speaker": "char2",
-          "text": "Aint HUGE wo- MAN Like This ANY"
+          "speaker": "char3",
+          "text": "THERE Aint HUGE wo- MAN Like This ANY WHErE"
         },
         {
-          "speaker": "char2",
+          "speaker": "char3",
           "text": "PLEASE THINK OF THE TALL"
         },
         {
-          "speaker": "char2",
-          "text": "MATERIALS ARE GOOD; TO BE EN -"
+          "speaker": "char3",
+          "text": "MATERIALS ARE GOOD. TO BE EN -"
         },
         {
-          "speaker": "char2",
+          "speaker": "char3",
           "text": "This s absolutely"
         },
         {
-          "speaker": "char2",
+          "speaker": "char3",
           "text": "THE Dif - FERENCE AnD ME is WEird Aint It"
         },
         {
-          "speaker": "char2",
+          "speaker": "char3",
           "text": "LIKE A DELMO."
         },
         {
-          "speaker": "char2",
+          "speaker": "char3",
           "text": "WHAT - Chu SAYR"
         }
       ],
       [
         {
-          "speaker": "char3",
-          "text": "WE HAVE TO SUCK"
+          "speaker": "char4",
+          "text": "WE HAVE TO SUCK It Up."
         },
         {
-          "speaker": "char3",
-          "text": "Wny_"
+          "speaker": "char5",
+          "text": "Wny."
         },
         {
-          "speaker": "char3",
+          "speaker": "char5",
           "text": "time"
         },
         {
-          "speaker": "char3",
+          "speaker": "char5",
           "text": "Urie:"
         },
         {
-          "speaker": "char3",
-          "text": "Ilke thls;"
+          "speaker": "char5",
+          "text": "Ilke THIS."
         },
         {
-          "speaker": "char3",
+          "speaker": "char5",
           "text": "YOU"
         },
         {
-          "speaker": "char3",
+          "speaker": "char5",
           "text": "and You Did On Your"
         },
         {
-          "speaker": "char3",
+          "speaker": "char5",
           "text": "WE'RE GOING TO MAKE Up FOR OUR FAILURE THE OTHEr DAY:"
         },
         {
-          "speaker": "char3",
-          "text": "Is now; Sasako:"
+          "speaker": "char5",
+          "text": "Is now. Sasako:"
         },
         {
-          "speaker": "char3",
+          "speaker": "char5",
+          "text": "YOU WoNT BE FOUND OUt; SQUAD LEADER"
+        },
+        {
+          "speaker": "char5",
           "text": "MNDER-"
         },
         {
-          "speaker": "char3",
+          "speaker": "char5",
           "text": "ACCEPTED"
         },
         {
-          "speaker": "char3",
+          "speaker": "char5",
+          "text": "Yeah. 0"
+        },
+        {
+          "speaker": "char5",
           "text": "ON NUT'S \"INGrEdi- ENTS LIST\" ,"
         },
         {
-          "speaker": "char3",
+          "speaker": "char5",
           "text": "DIFFICULTY"
         },
         {
-          "speaker": "char3",
+          "speaker": "char5",
           "text": "AND There TARGETS THAT ARE EASY:"
         },
         {
-          "speaker": "char3",
-          "text": "HOWEVER; There Are ConsiDER-"
+          "speaker": "char5",
+          "text": "HOWEVER. There Are ConsiDER-"
         },
         {
-          "speaker": "char3",
-          "text": "I THINK;"
+          "speaker": "char5",
+          "text": "I THINK."
         },
         {
-          "speaker": "char3",
+          "speaker": "char5",
           "text": "OF REQUESTS For TEENAGE \"FEMALES\" ."
         },
         {
-          "speaker": "char3",
+          "speaker": "char5",
           "text": "TheY ARE PERHAPS BEING Lined Up AS THE ING GOODS"
         }
       ]
@@ -709,27 +761,35 @@
         },
         {
           "speaker": "char1",
+          "text": "THEN NUT WILL PROBABLY LEAVE."
+        },
+        {
+          "speaker": "char1",
           "text": "SASSAN:"
+        },
+        {
+          "speaker": "char1",
+          "text": "ABOUT SAIKO,"
         },
         {
           "speaker": "char1",
           "text": "IGET THE FEELING"
         },
         {
-          "speaker": "char1",
+          "speaker": "char2",
           "text": "HM?"
         },
         {
-          "speaker": "char1",
-          "text": "THAT YOU ARE FEING SOFT ON HER _"
+          "speaker": "char2",
+          "text": "THAT YOU ARE FEING SOFT ON HER."
         },
         {
-          "speaker": "char1",
+          "speaker": "char2",
           "text": "YOU GOT SOME REASON FOR THAT?"
         },
         {
           "speaker": "char1",
-          "text": "SOFT_"
+          "text": "SOFT."
         },
         {
           "speaker": "char1",
@@ -738,50 +798,82 @@
       ],
       [
         {
-          "speaker": "char1",
+          "speaker": "char3",
           "text": "took her and"
         },
         {
-          "speaker": "char1",
+          "speaker": "char3",
+          "text": "and lefther husband shouse."
+        },
+        {
+          "speaker": "char3",
           "text": "With the support of"
         },
         {
-          "speaker": "char2",
+          "speaker": "char3",
+          "text": "Howevevoit seems thaf she Wasntvevy skilledlat managing ite"
+        },
+        {
+          "speaker": "char3",
           "text": "older"
         },
         {
-          "speaker": "char2",
+          "speaker": "char3",
+          "text": "joined the cheap-in-tuition CCG Academy Junior School:"
+        },
+        {
+          "speaker": "char3",
           "text": "YONE"
         },
         {
-          "speaker": "char2",
+          "speaker": "char3",
           "text": "ORiGiNALLY A GHOUL IN- VESTIGATOR"
         },
         {
-          "speaker": "char2",
-          "text": "She Did THAT; AS THE PRAC _ WELL TICAL SKills SECTION"
+          "speaker": "char3",
+          "text": "She Did Her CLASS- THAT; AS THE PRAC. WELL TICAL SKills"
         },
         {
-          "speaker": "char2",
+          "speaker": "char3",
+          "text": "YEAH"
+        },
+        {
+          "speaker": "char3",
           "text": "Her GAMES TO LECTURE TOO."
         },
         {
-          "speaker": "char2",
-          "text": "The TEACHER OFF SO MUCH"
+          "speaker": "char3",
+          "text": "SHE PISSED The TEACHER OFF SO MUCH"
         }
       ],
       [
         {
-          "speaker": "char2",
+          "speaker": "char4",
+          "text": "lmediately agreedto thissurgery"
+        },
+        {
+          "speaker": "char4",
+          "text": "Her MotHER. WHO KNEW ABOUT THE COMPENSATION PAYMENTS."
+        },
+        {
+          "speaker": "char4",
           "text": "explanation of the risks involved"
         },
         {
-          "speaker": "char2",
+          "speaker": "char4",
+          "text": "aan9 or So Ihear."
+        },
+        {
+          "speaker": "char4",
           "text": "JIHAVE TO MENTOR SAIKO- CHAN BECAUSE OF"
         },
         {
-          "speaker": "char2",
+          "speaker": "char4",
           "text": "AND OF PLAN TO DO THAT:"
+        },
+        {
+          "speaker": "char5",
+          "text": "BUt: 00o"
         }
       ]
     ]
@@ -804,7 +896,7 @@
         },
         {
           "speaker": "char1",
-          "text": "TO FORCE AnyMORE THAN THIS On HEr_"
+          "text": "TO FORCE AnyMORE THAN THIS On HEr."
         },
         {
           "speaker": "char1",
@@ -816,11 +908,15 @@
         },
         {
           "speaker": "char1",
-          "text": "OF HIS;"
+          "text": "WHAT 4 HORRIELE PARENT."
         },
         {
           "speaker": "char1",
-          "text": "ME TOO_ My FATHER WAS LIKE THAT:"
+          "text": "OF HIS."
+        },
+        {
+          "speaker": "char1",
+          "text": "ME TOO. My FATHER WAS LIKE THAT:"
         },
         {
           "speaker": "char1",
@@ -834,7 +930,7 @@
       [
         {
           "speaker": "char2",
-          "text": "THAT SHE HAS \"THAT FAMILY\""
+          "text": "But; SEEINg THAT SHE HAS \"THAT FAMILY\""
         },
         {
           "speaker": "char2",
@@ -870,7 +966,15 @@
         },
         {
           "speaker": "char2",
+          "text": "You are different from Saiko and us. arent you?"
+        },
+        {
+          "speaker": "char2",
           "text": "Sassan"
+        },
+        {
+          "speaker": "char2",
+          "text": "Its nofabouf whethenyou have\"or Gdon haveparents"
         },
         {
           "speaker": "char2",
@@ -878,44 +982,52 @@
         },
         {
           "speaker": "char2",
-          "text": "If that Were me, Id be_"
+          "text": "If that Were me, Id be."
+        },
+        {
+          "speaker": "char2",
+          "text": "Senpai"
         },
         {
           "speaker": "char3",
-          "text": "~UH_"
+          "text": "~UH."
+        },
+        {
+          "speaker": "char3",
+          "text": "S4S5AN."
         }
       ],
       [
         {
-          "speaker": "char3",
+          "speaker": "char4",
           "text": "IF"
         },
         {
-          "speaker": "char3",
-          "text": "YOUR RETURNED_"
+          "speaker": "char4",
+          "text": "YOUR RETURNED."
         },
         {
-          "speaker": "char3",
+          "speaker": "char4",
           "text": "Quit Being AN INVESTIGATOR?"
         },
         {
-          "speaker": "char3",
+          "speaker": "char5",
           "text": "WHAT? WOULD YOU BE LONELY?"
         },
         {
-          "speaker": "char3",
+          "speaker": "char4",
           "text": "IF YOU ANYMORE,"
         },
         {
-          "speaker": "char3",
-          "text": "THAT DUMBASS URIE WOULD BE COCKY;"
+          "speaker": "char4",
+          "text": "THAT DUMBASS URIE WOULD BE COCKY."
         },
         {
-          "speaker": "char3",
+          "speaker": "char6",
           "text": "HAHA THAT'S TRUE,"
         },
         {
-          "speaker": "char3",
+          "speaker": "char4",
           "text": "Noyd"
         }
       ]
@@ -927,130 +1039,170 @@
       [
         {
           "speaker": "char1",
-          "text": "QUIT:"
+          "text": "OH MNAN, THAT HAIR- STYuIS CREAT!"
+        },
+        {
+          "speaker": "char1",
+          "text": "SERI- OuSLY LOveLY!"
+        },
+        {
+          "speaker": "char1",
+          "text": "I~ WoNT QUIT:"
         },
         {
           "speaker": "char1",
           "text": "FOR SAYING"
         },
         {
-          "speaker": "char1",
+          "speaker": "char2",
+          "text": "NRD YURE STYLEH SofSH T00 Onbl&"
+        },
+        {
+          "speaker": "char2",
+          "text": "IaSO WANT T0 EARN MONEy"
+        },
+        {
+          "speaker": "char2",
           "text": "MU-"
         },
         {
-          "speaker": "char1",
+          "speaker": "char2",
           "text": "LKE THAT"
         },
         {
-          "speaker": "char1",
+          "speaker": "char2",
           "text": "TSUKI-"
         },
         {
-          "speaker": "char1",
+          "speaker": "char2",
           "text": "IS HE"
         },
         {
-          "speaker": "char1",
+          "speaker": "char2",
           "text": "WhAT'RE"
         },
         {
-          "speaker": "char1",
+          "speaker": "char2",
           "text": "MAMAN"
         },
         {
-          "speaker": "char1",
+          "speaker": "char2",
           "text": "SAIKO- CHAN?"
         },
         {
-          "speaker": "char1",
-          "text": "MUCCHANKO HAS SOMETHING alcohol"
+          "speaker": "char2",
+          "text": "It SeEmS MUCCHANKO HAS SOMETHING alcohol"
         },
         {
-          "speaker": "char1",
+          "speaker": "char2",
           "text": "WHAA"
         },
         {
-          "speaker": "char1",
-          "text": "THAT'S THE REASON FOR THAT"
+          "speaker": "char2",
+          "text": "THAT'S THE REASON FOR THAT DAriNG"
         },
         {
-          "speaker": "char1",
-          "text": "WAIT; HE'S STiLL A Bit UNDErAGE; WHAT IS HE DOING ?"
+          "speaker": "char2",
+          "text": "WAIT; HE'S STiLL A Bit UNDErAGE. Isnt HE_! WHAT IS HE DOING ?"
         },
         {
-          "speaker": "char1",
+          "speaker": "char2",
           "text": "WAYR"
         }
       ],
       [
         {
-          "speaker": "char1",
+          "speaker": "char3",
+          "text": "SENSEI"
+        },
+        {
+          "speaker": "char3",
+          "text": "WAS INVMeD By HER FORA \"parT-TIM JoB\" JUST Now: 8aa"
+        },
+        {
+          "speaker": "char3",
           "text": "WMH THIS ,"
         },
         {
-          "speaker": "char1",
+          "speaker": "char4",
           "text": "YOU TOO -"
         },
         {
-          "speaker": "char2",
+          "speaker": "char3",
+          "text": "HeH HEH HEH:"
+        },
+        {
+          "speaker": "char3",
           "text": "WHY?"
         },
         {
-          "speaker": "char2",
+          "speaker": "char3",
           "text": "COME Here , SAIKOI"
         },
         {
-          "speaker": "char2",
+          "speaker": "char3",
+          "text": "IL Coa Lona"
+        },
+        {
+          "speaker": "char3",
           "text": "JEEZ"
         },
         {
-          "speaker": "char2",
+          "speaker": "char3",
+          "text": "LooK. JW Lor: M"
+        },
+        {
+          "speaker": "char3",
           "text": "RAZU-"
         },
         {
-          "speaker": "char2",
+          "speaker": "char3",
           "text": "GO, GO,"
         },
         {
-          "speaker": "char2",
+          "speaker": "char3",
+          "text": "SAIKO,"
+        },
+        {
+          "speaker": "char3",
           "text": "MEMO"
         },
         {
-          "speaker": "char2",
+          "speaker": "char3",
           "text": "YOURRE"
         },
         {
-          "speaker": "char2",
-          "text": "TOORU__ HEREW"
+          "speaker": "char3",
+          "text": "TOORU_. HEREW"
         },
         {
-          "speaker": "char2",
+          "speaker": "char3",
           "text": "TLRNED"
         },
         {
-          "speaker": "char2",
+          "speaker": "char5",
           "text": "GREAT"
         },
         {
-          "speaker": "char2",
+          "speaker": "char3",
           "text": "MUCCHAN"
         },
         {
-          "speaker": "char2",
+          "speaker": "char5",
           "text": "YOUR DANCE IS OLD AS"
         }
       ],
       [
         {
-          "speaker": "char3",
+          "speaker": "char6",
           "text": "Haise"
         },
         {
-          "speaker": "char3",
+          "speaker": "char6",
           "text": "Want to remember"
         },
         {
-          "speaker": "char3",
+          "speaker": "char6",
           "text": "~HUk_?"
         }
       ]
@@ -1066,6 +1218,10 @@
         },
         {
           "speaker": "char1",
+          "text": "ROMA,"
+        },
+        {
+          "speaker": "char1",
           "text": "NICO-"
         },
         {
@@ -1074,11 +1230,11 @@
         },
         {
           "speaker": "char1",
-          "text": "~HAISE _ KUN;"
+          "text": "~HAISE. KUN."
         },
         {
           "speaker": "char1",
-          "text": "MOSPHERE AROUnd Him HAS CHANGED; WEARING GIRLS CLOTHES"
+          "text": "MOSPHERE AROUnd Him HAS CHANGED. WEARING GIRLS CLOTHES"
         },
         {
           "speaker": "char1",
@@ -1106,20 +1262,20 @@
         },
         {
           "speaker": "char1",
-          "text": "He's COME;"
+          "text": "He's COME."
         }
       ],
       [
         {
-          "speaker": "char2",
+          "speaker": "char1",
           "text": "FORM AS HE WAS COM- PLETELy SUBMERGED"
         },
         {
-          "speaker": "char2",
-          "text": "BEAUTIFUL_"
+          "speaker": "char1",
+          "text": "BEAUTIFUL."
         },
         {
-          "speaker": "char2",
+          "speaker": "char1",
           "text": "Like THE \"I BUT THAT WILL nOT GUYIS LOSE TO TRAGEDYI\""
         },
         {
@@ -1127,44 +1283,44 @@
           "text": "A LAME"
         },
         {
-          "speaker": "char2",
+          "speaker": "char1",
           "text": "RETURN THAT"
         },
         {
-          "speaker": "char2",
+          "speaker": "char1",
           "text": "He SHOULD Hurry Up"
         },
         {
-          "speaker": "char2",
+          "speaker": "char1",
           "text": "BEAUTIFUL"
         },
         {
-          "speaker": "char2",
+          "speaker": "char1",
           "text": "ITD BE OKAY IF Right?"
         },
         {
           "speaker": "char2",
-          "text": "THe NEXT AuCTION:_"
+          "text": "THe NEXT AuCTION:."
         },
         {
           "speaker": "char2",
-          "text": "NNFF_"
+          "text": "NNFF."
         },
         {
           "speaker": "char2",
-          "text": "~JEEZ;"
+          "text": "~JEEZ."
         },
         {
           "speaker": "char2",
-          "text": "YOU REALLY DO WHATEVER YOU FEEL ~BUT_ LIKE"
+          "text": "YOU REALLY DO WHATEVER YOU FEEL ~BUT. LIKE"
         },
         {
           "speaker": "char2",
-          "text": "The FORM OF SPILLING WINE__"
+          "text": "The FORM OF SPILLING WINE_."
         },
         {
           "speaker": "char2",
-          "text": "IS ALSO BEAUTI - FUL_"
+          "text": "IS ALSO BEAUTI - FUL."
         }
       ],
       [
@@ -1189,11 +1345,15 @@
       [
         {
           "speaker": "char1",
-          "text": "I FEARED NOTHING , HAD Nothing To LOSE_ HAD MY Fighting Spipit"
+          "text": "I FEARED NOTHING , HAD Nothing To LOSE. HAD MY Fighting Spipit"
         },
         {
           "speaker": "char1",
           "text": "The OKA"
+        },
+        {
+          "speaker": "char1",
+          "text": "AND A Quick TEMpeR"
         },
         {
           "speaker": "char1",
@@ -1205,7 +1365,7 @@
         },
         {
           "speaker": "char1",
-          "text": "You THAT PART OF My Life Nicely, chiRo_"
+          "text": "You THAT PART OF My Life Nicely, DEnShi- chiRo."
         }
       ],
       [
@@ -1219,7 +1379,7 @@
         },
         {
           "speaker": "char1",
-          "text": "HALF A StEp FR- THER AWAY NOW . COMPARED To BACK Then_"
+          "text": "You'Re HALF A StEp FR- THER AWAY NOW . COMPARED To BACK Then."
         }
       ],
       [
@@ -1230,6 +1390,10 @@
         {
           "speaker": "char2",
           "text": "SHALL"
+        },
+        {
+          "speaker": "char2",
+          "text": "DENSHI- CHIRO."
         }
       ]
     ]
@@ -1245,45 +1409,53 @@
       ],
       [
         {
-          "speaker": "char1",
+          "speaker": "char2",
           "text": "Him"
         },
         {
-          "speaker": "char1",
-          "text": "HAAH_"
+          "speaker": "char2",
+          "text": "HAAH."
         },
         {
-          "speaker": "char1",
+          "speaker": "char2",
           "text": "must"
         },
         {
-          "speaker": "char1",
+          "speaker": "char2",
+          "text": "CLOSE."
+        },
+        {
+          "speaker": "char2",
           "text": "Just enough touch"
         },
         {
-          "speaker": "char1",
+          "speaker": "char2",
           "text": "My therel"
         },
         {
-          "speaker": "char1",
+          "speaker": "char2",
           "text": "It'S REALLY DoWN"
         }
       ],
       [
         {
-          "speaker": "char2",
+          "speaker": "char3",
           "text": "DOES"
         },
         {
-          "speaker": "char2",
+          "speaker": "char3",
           "text": "It"
         },
         {
-          "speaker": "char2",
+          "speaker": "char3",
           "text": "Much EVERY CAPITAL?"
         },
         {
-          "speaker": "char2",
+          "speaker": "char3",
+          "text": "SAA AAA AAH"
+        },
+        {
+          "speaker": "char3",
           "text": "you hear it, Denshi chiro?"
         }
       ]
@@ -1294,6 +1466,10 @@
     "pages": [
       [],
       [
+        {
+          "speaker": "char1",
+          "text": "StOPl"
+        },
         {
           "speaker": "char1",
           "text": "Stop Right There!"

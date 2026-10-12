@@ -108,6 +108,9 @@ def run_pipeline_on_images(image_paths: List[Path], seq_name: str = "seq_custom"
 
     all_seq_boxes = []
 
+    from detection.bubble_ocr import preprocess_crop
+    from pipeline.inference_yolo import _get_crop_reader
+
     for pg, (img, path) in enumerate(zip(pil_images, image_paths)):
         gray = np.array(img.convert("L"))
         panels = page_panels_list[pg]
@@ -163,27 +166,58 @@ def run_pipeline_on_images(image_paths: List[Path], seq_name: str = "seq_custom"
             if not assigned:
                 unassigned.append(idx)
 
+        # 5. Form containers: aggregate OCR into bubbles + crop recovery for empty/polluted bubbles
         containers = []
         for bk, ocr_idxs in bubble_members.items():
-            if not ocr_idxs: continue
-            ocr_idxs.sort(key=lambda i: (df.iloc[i].y0, df.iloc[i].x0))
-            texts = [clean_line(df.iloc[i].text).strip() for i in ocr_idxs]
-            merged = " ".join(t for t in texts if t)
-            if not merged: continue
             bbox = valid_bubbles[bk]["bbox"]
+            bw = bbox[2] - bbox[0]
+            merged = ""
+
+            is_cross_bleed = False
+            if ocr_idxs:
+                for oi in ocr_idxs:
+                    ow = df.iloc[oi].x1 - df.iloc[oi].x0
+                    if ow > 1.35 * bw or (ow > 180 and bw < 140):
+                        is_cross_bleed = True
+                        break
+
+            if ocr_idxs and not is_cross_bleed:
+                ocr_idxs.sort(key=lambda i: (df.iloc[i].y0, df.iloc[i].x0))
+                texts = [clean_line(df.iloc[i].text).strip() for i in ocr_idxs]
+                merged = " ".join(t for t in texts if t)
+            elif (is_cross_bleed or not ocr_idxs) and valid_bubbles[bk]["conf"] >= 0.40:
+                bx0 = max(0, int(bbox[0] - 4))
+                by0 = max(0, int(bbox[1] - 4))
+                bx1 = min(int(W), int(bbox[2] + 4))
+                by1 = min(int(H), int(bbox[3] + 4))
+                if bx1 > bx0 + 8 and by1 > by0 + 8:
+                    crop = img.crop((bx0, by0, bx1, by1))
+                    prep = preprocess_crop(crop, target_side=256)
+                    reader = _get_crop_reader()
+                    res = reader.reader.readtext(prep)
+                    words = [clean_line(r[1]).strip() for r in res if clean_line(r[1]).strip()]
+                    words = [w for w in words if any(c.isalnum() for c in w)]
+                    merged = " ".join(words)
+                    if sum(c.isalpha() for c in merged) < 3:
+                        merged = ""
+
+            if not merged:
+                continue
             containers.append({"page": pg, "bbox": [float(v) for v in bbox],
                                "text": merged, "panel": _find_panel(bbox, panels), "tag": "dialogue"})
 
         for u_idx in unassigned:
             row = df.iloc[u_idx]
             t = clean_line(row.text).strip()
-            if not t: continue
+            if not t:
+                continue
             bbox = [float(row.x0), float(row.y0), float(row.x1), float(row.y1)]
             tag = _classify_unassigned(bbox, size)
             containers.append({"page": pg, "bbox": bbox, "text": t,
                                "panel": _find_panel(bbox, panels), "tag": tag})
 
-        if not containers: continue
+        if not containers:
+            continue
         c_boxes = np.array([c["bbox"] for c in containers])
         for ord_idx in order_boxes(c_boxes, panels, READING_RTL, size):
             all_seq_boxes.append(containers[ord_idx])

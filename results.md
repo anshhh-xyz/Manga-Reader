@@ -12,6 +12,11 @@
 | P9 hybrid spatial tracker tuned (Option 2) | dev | 0.7477 | 0.3267 | 0.5957 | 0.4380 | 0.6361 | Refined normalized geometry H1/H2/H3 sweep (76.2% stacked acc, 2.56 pred spks) |
 | P10 pairwise turn-taking XGBoost (Phase 5) | dev | 0.7477 | **0.3912** | **0.7361** | **0.5409** | 0.6361 | **DEV CHAMPION** (Rank parity + physical panel gaps + t=0.50 clustering) |
 | **hybrid_yolo_val (Production)** | val | **0.7673** | **0.3607** | **0.6626** | **0.5030** | **0.6665** | **PRODUCTION PIPELINE** (YOLO bubble containers + Phase 5 XGBoost) |
+| P11 pairwise 26-feat (+char proximity) | val | 0.7931 | 0.3487 | 0.6437 | 0.4884 | 0.7055 | YOLOv8n character proximity ablation (noise introduced, kept 22-feat prod) |
+| **P12 Decoupled Crop OCR + Typography (Record)** | val | **0.8066** | **0.3604** | **0.6407** | **0.5069** | **0.7288** | Bleed decoupling + hyphen rejoining, breaks 0.80 text order & 72.88% coverage |
+| P13 DeBERTa Hybrid alpha=0.3 (best blend) | val | 0.7748 | 0.3379 | 0.6262 | 0.4887 | 0.6859 | 12,368 pairs, fine-tuned deberta-v3-base; spatial still dominates; not promoted |
+| P13 DeBERTa Pure (alpha=1.0) | val | 0.7748 | 0.2378 | 0.5647 | 0.3610 | 0.6859 | Without spatial grounding, language model collapses — manga topic overlap kills it |
+| **P14 Optimal Clustering Hyperparameters (New Record)** | val | **0.8066** | **0.3755** | **0.6422** | **0.5077** | **0.7288** | **PROJECT RECORD**: t=0.48, merge_singletons=False, max_k=6; eliminates false singleton merges |
 
 ---
 
@@ -378,3 +383,6 @@ $$\text{Raw Page Images} \to \text{PaddleOCR} \to \text{XY-Cut Panels} \to \text
 | **`hybrid_yolo_val`** | val | **0.7673** | **0.3607** | **0.6626** | **0.5030** | **0.6665** | **WINNING PRODUCTION PIPELINE**: YOLO Bubble Containers + Phase 5 XGBoost |
 | `hybrid_yolo_narr_val` | val | 0.7673 | 0.3368 | 0.6913 | 0.5230 | 0.6665 | Early narration tagging heuristic (false narration penalty) |
 | `yolo_narr_improved_val` | val | 0.7673 | 0.3521 | 0.6626 | 0.5030 | 0.6665 | Refined 3-signal narration rule (drops due to unmatchable Hungarian extra speakers) |
+| test_baseline | val | 0.7673 | 0.3368 | 0.6913 | 0.5230 | 0.6665 |  |
+| test_yolo_hybrid | val | 0.7673 | 0.3607 | 0.6626 | 0.5030 | 0.6665 |  |
+| yolo_hybrid_option3 | val | 0.8066 | 0.3604 | 0.6407 | 0.5069 | 0.7288 |  |
