@@ -1,7 +1,9 @@
 # Manga Task Reader: Hybrid YOLO-Guided Container & Spatial Diarization Pipeline
 
 An end-to-end autonomous manga reading system designed to extract, filter, structure, order, and attribute speaker dialogues from multi-page Japanese comic sequences.
-REFER "approach.md" for my apprach and everything else.
+
+
+**refer "approach.md" for my apprach and everything else.**
 
 ---
 
